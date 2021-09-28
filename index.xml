@@ -6,7 +6,74 @@
     <description>Recent content on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 28 Sep 2021 23:25:50 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 28 Sep 2021 23:43:19 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>XML external entity injection - XXE</title>
+      <link>https://datnlq.github.io/posts/xxe/</link>
+      <pubDate>Tue, 28 Sep 2021 23:43:19 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/xxe/</guid>
+      <description>XML external entity injection (XXE) What is XML enternal entity injection ? XML entermal entity injection hay còn được gọi là XXE injection là 1 lỗ hổng được đánh giá mức độ nghiêm trọng là 4/10 Web Application Secirity Risks của OWASP. XXE là một lỗ hổng bảo mật web cho phép hacker tấn công can thiệp vào quá trình xử lí dữ liệu XML của application.
+Về XXE thì sẽ có 2 phần định nghĩa như sau :</description>
+    </item>
+    
+    <item>
+      <title>Server-side request forgery - SSRF</title>
+      <link>https://datnlq.github.io/posts/ssrf/</link>
+      <pubDate>Tue, 28 Sep 2021 23:41:26 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/ssrf/</guid>
+      <description>Server-side request forgery (SSRF) What is Server-side request forgery ? SSRF là 1 lỗ hổng bảo mật web cho phéo kẻ tấn công điều khiển ứng dụng phía máy chủ thực hiện các yêu cầu HTTP đến 1 tên miền tùy ý của hacker.
+Trong 1 cuộc tấn công SSRF điển hình thì hacker có thể kiến server tạo kết nối với các dịch vụ chỉ dành cho nội bộ trong cở sở hạ tầng của tổ chức.</description>
+    </item>
+    
+    <item>
+      <title>SQL injection vulnerability</title>
+      <link>https://datnlq.github.io/posts/sqlinjection/</link>
+      <pubDate>Tue, 28 Sep 2021 23:40:25 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/sqlinjection/</guid>
+      <description>PortSwigger Web Security Academy Labs SQL Injection [SQL injection vulnerability in WHERE clause allowing retrieval of hidden data] Đề bài yêu cầu chúng ta khai thác lỗ thông trong phần filter danh mục sản phẩm, và đã cho sẳn chúng ta câu truy vấn sql như sau:
+SELECT * FROM products WHERE category = &amp;#39;Gifts&amp;#39; AND released = 1 Khi truy cập vào bài lab, thì chúng ta thấy 1 trang web bán hàng gồm nhiều sản phẩm, theo như đề bài chúng ta filter bằng những từ khóa có sẳn dùng Burp Suite để bắt lấy request như sau:</description>
+    </item>
+    
+    <item>
+      <title>HTTP Request Smuggling - HRS</title>
+      <link>https://datnlq.github.io/posts/hrs/</link>
+      <pubDate>Tue, 28 Sep 2021 23:39:35 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/hrs/</guid>
+      <description>HTTP Request Smuggling What is HTTP Request Smuggling ? HTTP request smuggling (HRS) là 1 kỹ thuật tấn công nhằm vào các HTTP server(web server, proxy server). Bất cứ khi nào 1 HTTP requset của client được phân tích bởi nhiều hơn 1 hệ thống thì đều có khả năng bị HRS. HRS thường rất nghiêm trọng, cho phép kẻ tấn công vượt qua các kiểm soát bảo mật, truy cập trái phép vào dữ liệu nhảy cảm và xâm phạm vào ứng dụng.</description>
+    </item>
+    
+    <item>
+      <title>DOM-based vulnerabilities</title>
+      <link>https://datnlq.github.io/posts/dombased/</link>
+      <pubDate>Tue, 28 Sep 2021 23:38:38 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/dombased/</guid>
+      <description>DOM-based vulnerabilities What is DOM-based vulnerabilities ? DOM viết tắt của Document Object Model là 1 dạng chuẩn của W3C đưa ra nhằm để truy xuất và thao tác dữ liệu của tài liệu có cấu trúc như HTML, XML. Mô hình này thể hiện tài liệu dưới dạng cấu trúc cây phân cấp. Tất cả các thành phần trong HTML, XML đều được xem như một node. DOM Based XSS là kỹ thuật khai thác XSS dựa trên việc thay đổi cấu trúc DOM của tài liệu, cụ thể là HTML.</description>
+    </item>
+    
+    <item>
+      <title>Cross-site Request Forgery - CSRF</title>
+      <link>https://datnlq.github.io/posts/csrf/</link>
+      <pubDate>Tue, 28 Sep 2021 23:36:11 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/csrf/</guid>
+      <description>Cross-site Request Forgery What is Cros-site Request Forgery ? Also known as CSRF CSRF là một lỗ hổng web cho phép kẻ tấn công thực hiện các hành vi dựa trên người dùng, mà người dùng không nhận thức được các hành vi đó. Đây là một kỹ thuật mượn quyền trái phép.
+How to exploit CSRF ? Example Để có thể thực hiện được cuộc tấn công CSRF, cần có ba điều kiện chính:</description>
+    </item>
+    
+    <item>
+      <title>Cross-origin resource sharing - CORS</title>
+      <link>https://datnlq.github.io/posts/cors/</link>
+      <pubDate>Tue, 28 Sep 2021 23:34:34 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/cors/</guid>
+      <description>Cross-origin resource sharing (CORS) là gì ? What is CORS ? Tên đầy đủ là Cross-Origin Resource Sharing. Hiểu sâu hơn đó chính là chia sẻ tài nguyên có nhiều nguồn gốc khác nhau. Chính sách nguồn gốc giống nhau của trình duyệt là một cơ chế bảo mật quan trọng. Khách hàng từ các nguồn khác nhau không thể truy cập tài nguyên của nhau nếu không được phép. Định nghĩa của tương đồng là protocol,domain và port của liên kết truy cập là giống nhau.</description>
+    </item>
+    
     <item>
       <title>Clickjacking</title>
       <link>https://datnlq.github.io/posts/clickjacking/</link>

