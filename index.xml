@@ -90,7 +90,9 @@ Clickjacking là gì ? Nói ngắn gọn dễ hiểu nhất là một hình th�
       <pubDate>Tue, 28 Sep 2021 22:03:55 +0700</pubDate>
       
       <guid>https://datnlq.github.io/posts/ductf/</guid>
-      <description>DUCTF WriteUp Pwn (4/9) deadcode babygame hellothere </description>
+      <description>DUCTF WriteUp Pwn (4/9) deadcode First things, we have to check file and checksec cmd to make something clearly.
+We can see it a ELF 64bits file, no canary found, no pie,NX enabled (Non-eXecutable). It mean we can use IDA Pro 64bits to read and no canary,no pie, can&amp;rsquo;t execute in stack :D .
+After that, i using IDA Pro 64 bits to read ELF file and can be get source code C like this.</description>
     </item>
     
   </channel>
