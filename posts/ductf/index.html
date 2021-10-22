@@ -63,7 +63,7 @@ After that, i using IDA Pro 64 bits to read ELF file and can be get source code 
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          4 min read
+          5 min read
         </div>
       </div>
     </header>
@@ -191,12 +191,31 @@ exploit()
 </code></pre></div><p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/outbd_flag.png?raw=true" alt="img"></p>
 <h3 id="babygame">babygame</h3>
 <p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame.png?raw=true" alt="img"></p>
+<p>First I check file like this!</p>
 <p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_check.png?raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_ida.png?raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_getnum.png?raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_set_user.png?raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_printuser.png?raw=true" alt="img"></p>
+<p>And I using IDA Pro 64bits to read source code C .
+<img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_ida.png?raw=true" alt="img"></p>
+<p>In this program have some function like : get_num(),set_username(),print_username() and game().
+It have 3 case, if input == 1: I can reset username, if input == 2 i can print NAME value. if input = 1337 i am going to game() function.</p>
+<p>get_num() function read input and convert it to number.
+<img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_getnum.png?raw=true" alt="img"></p>
+<p>set_username() reset username for u by the way read input and write to NAME value using fread</p>
+<p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_set_user.png?raw=true" alt="img">
+print_username() show username to your terminal using puts
+<img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_printuser.png?raw=true" alt="img">
+This is a main function becus it have system('/bin/sh'). It open file in path is randbuf with mode &lsquo;rb&rsquo;. After that, read first 4 bytes in header and cmp with input from get_num().</p>
 <p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_game.png?raw=true" alt="img"></p>
+<p>Bug:</p>
+<ul>
+<li>RANDBUF in a value after NAME value, so we can bof NAME value.</li>
+<li>get_num() can be using to connect NAME and RANDBUF becuz it don&rsquo;t have null bytes after string.</li>
+</ul>
+<p>Exploit:</p>
+<ul>
+<li>Connect string</li>
+<li>Bof RANDBUF</li>
+<li>Input = Fisrt 4 bytes of this file.</li>
+</ul>
 <p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_bytes.png?raw=true" alt="img"></p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
 
@@ -236,6 +255,9 @@ exploit()
 
 
 </code></pre></div><p><img src="https://github.com/datnlq/Pwn/blob/main/CTF/DUCTF/images/babygame_flag.png?raw=true" alt="img"></p>
+<h2 id="web-solve-2-challenge">Web (solve 2 challenge)</h2>
+<h3 id="inside-out">Inside-Out</h3>
+<h3 id="cowboy-world">Cowboy World</h3>
 
     </div>
     <div class="post-footer">

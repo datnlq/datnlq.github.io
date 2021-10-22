@@ -6,7 +6,17 @@
     <description>Recent content in Posts on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 28 Sep 2021 23:43:19 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 22 Oct 2021 21:43:05 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Learn PWN - Practice:  First step </title>
+      <link>https://datnlq.github.io/posts/protostar/</link>
+      <pubDate>Fri, 22 Oct 2021 21:43:05 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/protostar/</guid>
+      <description>How did I come into contact with pwn ? In random day in random year ago, i feel like it&amp;rsquo;s fun to pwn, so &amp;hellip;. i tried it like this.
+PROTOSTAR EXPLOIT EXERCISE Stack 0 Hãy cùng mở đầu với stackz3r0 nào các bạn ! Đề bài đã cung cấp cho chúng ta code C nên mọi thứ sẽ dễ hình dung hơn là mã ASM tuy nhiên chúng ta sẽ phân tích cả 2 nhé!</description>
+    </item>
+    
     <item>
       <title>XML external entity injection - XXE</title>
       <link>https://datnlq.github.io/posts/xxe/</link>
