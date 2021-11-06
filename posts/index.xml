@@ -6,7 +6,16 @@
     <description>Recent content in Posts on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 22 Oct 2021 21:43:05 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 07 Nov 2021 04:03:51 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AccessControl</title>
+      <link>https://datnlq.github.io/posts/accesscontrol/</link>
+      <pubDate>Sun, 07 Nov 2021 04:03:51 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/accesscontrol/</guid>
+      <description>Access Control Vulnerabilities Chào mọi người ~ Mình đã dừng việc traning trên portswigger 1 thời gian khá dài, maybe do mình chơi đồ (án) nhiều quá :3 Nhưng dù sao mình không nên bỏ bê chứng chỉ web này được :D. Hôm nay chúng ta sẽ mô tả về lỗ hổng kiểm soát truy cập(Access control) và leo thang đặc quyền (Privilege escalation) nhé! Để có thể khai thác được bất kỳ lỗ hổng nào thì chúng ta đều phải biết nó là lỗ hổng gì trước nên chúng ta sẽ tìm hiểu qua khái niệm của 2 lỗ hổng này trước</description>
+    </item>
+    
     <item>
       <title>Learn PWN - Practice:  First step </title>
       <link>https://datnlq.github.io/posts/protostar/</link>

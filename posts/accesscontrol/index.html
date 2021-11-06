@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>AccessControl // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="AccessControl"/>
+<meta name="twitter:description" content="Access Control Vulnerabilities Chào mọi người ~ Mình đã dừng việc traning trên portswigger 1 thời gian khá dài, maybe do mình chơi đồ (án) nhiều quá :3 Nhưng dù sao mình không nên bỏ bê chứng chỉ web này được :D. Hôm nay chúng ta sẽ mô tả về lỗ hổng kiểm soát truy cập(Access control) và leo thang đặc quyền (Privilege escalation) nhé! Để có thể khai thác được bất kỳ lỗ hổng nào thì chúng ta đều phải biết nó là lỗ hổng gì trước nên chúng ta sẽ tìm hiểu qua khái niệm của 2 lỗ hổng này trước"/>
+
+    <meta property="og:title" content="AccessControl" />
+<meta property="og:description" content="Access Control Vulnerabilities Chào mọi người ~ Mình đã dừng việc traning trên portswigger 1 thời gian khá dài, maybe do mình chơi đồ (án) nhiều quá :3 Nhưng dù sao mình không nên bỏ bê chứng chỉ web này được :D. Hôm nay chúng ta sẽ mô tả về lỗ hổng kiểm soát truy cập(Access control) và leo thang đặc quyền (Privilege escalation) nhé! Để có thể khai thác được bất kỳ lỗ hổng nào thì chúng ta đều phải biết nó là lỗ hổng gì trước nên chúng ta sẽ tìm hiểu qua khái niệm của 2 lỗ hổng này trước" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/accesscontrol/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-07T04:03:51+07:00" />
+<meta property="article:modified_time" content="2021-11-07T04:03:51+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">AccessControl</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Nov 7, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          18 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="access-control-vulnerabilities">Access Control Vulnerabilities</h1>
+<p>Chào mọi người ~ Mình đã dừng việc traning trên portswigger 1 thời gian khá dài, maybe do mình chơi đồ (án) nhiều quá :3 Nhưng dù sao mình không nên bỏ bê chứng chỉ web này được :D.
+Hôm nay chúng ta sẽ mô tả về lỗ hổng kiểm soát truy cập(Access control) và leo thang đặc quyền (Privilege escalation) nhé!
+Để có thể khai thác được bất kỳ lỗ hổng nào thì chúng ta đều phải biết nó là lỗ hổng gì trước nên chúng ta sẽ tìm hiểu qua khái niệm của 2 lỗ hổng này trước</p>
+<h3 id="what-is-access-control-">What is access control ?</h3>
+<p>Access control ( authorization &lt;ủy quyền&gt;) là cấp quyền, ủy quyền, áp dụng các ràng buộc về ai đó hoặc gì đó để có thể thực hiện các hành động hoặc truy cập các tài nguyên.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Accessctl_lythuyet.png?raw=true" alt="img"></p>
+<p>Trong web app thì có các ngữ cảnh kiểm soát truy cập như sau :</p>
+<ul>
+<li>Authentication : Xác thực người dùng chính là họ</li>
+<li>Session management xác định các yêu cầu HTTP tiếp theo được cho phép thực hiện bởi chính người dùng</li>
+<li>Access control xác định liệu người dùng có được phép thực hiện hành động hoặc truy cập đó hay không.</li>
+</ul>
+<p>Lỗ hổng kiểm soát truy cập là 1 lỗ hổng thường gặp và khá nghiêm trọng. Việc thiết kế, quản lý các biện pháp kiểm soát quyền truy cập là một vấn đề phức tạp. Mà mô hình này được thiết kế bởi con người cho nên khả năng xảy ra sai sót là rất cao.</p>
+<p>Việc hacker tấn công vào lỗ hổng này được chia làm 2 loại như sau được đề cập đến trong Top 10 lỗ hổng bảo mật web của OWASP-2017</p>
+<h4 id="broken-authentication-and-session-management">Broken Authentication and Session Management</h4>
+<p>Khi các chức năng của ứng dụng được thực hiện không chính xác, hacker có thể dễ dàng xâm nhập, đánh cắp
+thông tin tài khoản, mật khẩu và khai thác các lỗ hổng khác bằng cách sử dụng các chứng chỉ đã đánh cắp.
+Tài khoản mỗi người dùng cá nhân nên là duy nhất, không bị trùng lặp dưới bất kì hình thức nào.
+Nếu không có bất kì sự quản lý cần thiết nào thì tin tặc có thể lẻn vào, ngụy trang thành người dùng để
+ăn cắp thông tin tài khoản, mật khẩu và sử dụng cho những lần truy cập sau này.</p>
+<h4 id="broken-access-control">Broken Access Control</h4>
+<p>Khi người dùng bị hạn chế kiểm soát truy cập, hacker có thể khai thác và truy cập các chức năng hoặc dữ
+liệu trái phép. Kiểm soát truy cập nhằm mục đích kiểm soát người dùng trong một ứng dụng và để thiết lập
+quyền kiểm soát truy cập một cách hợp lý, ứng dụng phải đảm bảo thực hiện kiểm tra ủy quyền, phân quyền và
+xác thực hợp lệ để xác định rõ ràng đặc quyền của người dùng. Nguyên nhân dẫn đến lỗi này có thể do các nhà phát triển
+gặp lỗi trong quá trình phân quyền và kiểm soát yêu cầu phù hợp với các quy tắc đặt ra, hoặc có thể do an ninh lỏng lẻo tại các tầng kiến trúc của web như
+framework, server, serverdata, &hellip;nên hacker có thể lợi dụng và tấn công lấy quyền truy cập.</p>
+<h3 id="what-is-privilege-escalation-">What is Privilege escalation ?</h3>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Accessctl_Privilege_lythuyet.png?raw=true" alt="img"></p>
+<p>Privilege escalation ( leo thang đặc quyền) xảy ra khi bạn có thể truy cập những chức năng hoặc tài nguyên mà bạn không được cho phép, việc leo thang đặc quyền này cần phải được ngăn chặn. Leo thang đặc quyền thường xuất hiện do 1 lỗ hổng trong ứng dụng gây ra.
+Mức độ leo thang tùy thuộc vào những đặc quyền mà hacker có được dựa vào khai thác lỗ hổng.</p>
+<h3 id="the-impacts-of-broken-access-control">The Impacts of Broken Access Control</h3>
+<p>Như đã đề cập đến, mức độ của lỗ hổng này tùy thuộc vào dữ liệu mà hacker có thể khai thác được. Một số hành vi đặc trưng như sau :</p>
+<h6 id="exposure-of-unauthorized-content-hiển-thị-nổi-dung-trái-phép">Exposure of Unauthorized Content (Hiển thị nổi dung trái phép)</h6>
+<p>Khi hacker đã có đặc quyền truy cập trái phép thì sẽ có thể tiếp cận tới nhiều tài nguyên không được phép, điều đó có nghĩa là hacker sẽ có thể truy cập, tác động lên những thông tin nhạy cảm của công ty.</p>
+<h6 id="privilege-escalation-leo-thang-đặc-quyền">Privilege Escalation (Leo thang đặc quyền)</h6>
+<p>Hacker khai thác các lỗ hổng để có được đặc quyền cao hơn đặc quyền hiện có của mình, việc này có thể giúp hacker dễ dàng đánh cắp dữ liệu hoặc triển khai các payload độc hại.</p>
+<h6 id="distributed-denial-of-service--từ-chối-dịch-vụ-ddos">Distributed Denial of Service ( Từ chối dịch vụ <!-- raw HTML omitted -->)</h6>
+<p>Việc quyền truy cập vào nhiều tài khoản, hacker có thể triển khai tấn công bằng cách setup bot trong các tài khoản này để nó liên tục gửi các request đến server. Khiến không truy cập được các dich vụ, &hellip;</p>
+<h4 id="common-access-control-vulnerabilities-các-lỗ-hổng-kiểm-soát-truy-cập-phổ-biến">Common Access Control Vulnerabilities (Các lỗ hổng kiểm soát truy cập phổ biến)</h4>
+<ul>
+<li>Vertical Privilege Escalation:</li>
+</ul>
+<p>Ví dụ về các cuộc tấn công leo thang đặc quyền theo chiều dọc từ các kiểm soát truy cập theo chiều dọc bị hỏng bao gồm:</p>
+<pre><code>+ Chức năng nhạy cảm không được bảo vệ
+
++ Các cuộc tấn công dựa trên tham số
+
++ Kiểm soát truy cập bị hỏng do định cấu hình sai nền tảng
+</code></pre>
+<ul>
+<li>
+<p>Horizontal Privilege Escalation : cho phép người dùng ứng dụng khác nhau truy cập các loại tài nguyên tương tự. Các cơ chế này chỉ hạn chế quyền truy cập vào tài nguyên đối với nhóm người dùng được phép truy cập tài nguyên. Ví dụ: một ứng dụng ngân hàng cho phép khách hàng xem hồ sơ giao dịch của họ nhưng không cho phép người dùng khác xem. Kiểm soát truy cập ngang bị hỏng cho phép kẻ tấn công truy cập tài nguyên thuộc về người dùng khác và do kiểm soát ID không đúng.</p>
+</li>
+<li>
+<p>Context-Dependent Privilege Escalation :</p>
+<p>Một số cuộc tấn công leo thang đặc quyền phụ thuộc vào ngữ cảnh bao gồm:</p>
+<ul>
+<li>
+<p>Insecure Direct Object Reference : Tham chiếu đối tượng trực tiếp không an toàn</p>
+</li>
+<li>
+<p>Multi-step attacks Tấn công nhiều bước</p>
+</li>
+<li>
+<p>Attacks on referer-based mechanisms :Các cuộc tấn công vào các cơ chế dựa trên giới thiệu</p>
+</li>
+<li>
+<p>Attacks on geographical location-based mechanisms :Tấn công vào cơ chế dựa trên vị trí địa lý</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="preventing-broken-access-control-vulnerabilities">Preventing Broken Access Control Vulnerabilities</h3>
+<p>Kiểm soát truy cập bị hỏng là một lỗ hổng được xếp hạng cao trong danh sách OWASP được đánh giá là thỉnh thoảng xảy ra, có khả năng khai thác trung bình và có tác động cực kỳ sâu sắc và có hại.</p>
+<p>Cho nên chúng ta cần phải ngăn chặn lỗ hổng này, sau đây 1 vài phương pháp để ngăn chặn các cuộc tấn công kiểm soát truy cập.</p>
+<pre><code>+ Deny by Default : Một nguyên tắc chung với kiểm soát truy cập là bắt đầu với các chức năng đặc
+quyền tối thiểu được yêu cầu. Ví dụ: theo mặc định, mọi người dùng của ứng dụng sẽ bị từ chối 
+quyền truy cập vào tài nguyên ứng dụng, chỉ người dùng hợp pháp mới có quyền xem, truy cập và sửa
+đổi chúng. Ngoài ra, các nhóm bảo mật nên xóa quyền quản trị và các đặc quyền nâng cao khác, giảm phạm vi ảnh hưởng khi kẻ tấn công có được thông tin đăng nhập của người dùng. Quản lý phiên cũng nên được thực hiện bằng cách sử dụng truy cập Just in Time để loại bỏ nhu cầu về các đặc quyền liên tục mà tin tặc có thể nhanh chóng lấy được.
+
++ Central Interface for Application-wide Access Controls : Phải có một giao diện trung tâm, được quản lý để ghi lại các sơ đồ kiểm soát truy cập được sử dụng và hỗ trợ trong việc thiết kế một khuôn khổ được sử dụng để kiểm tra sự thành công của các cơ chế kiểm soát truy cập đã thiết lập.
+
++ Handle Access Controls At Server-Side : Các tổ chức chỉ nên tin tưởng xác thực và ủy quyền phía máy chủ vì tổ chức áp dụng các biện pháp kiểm soát giống nhau cho tất cả các dịch vụ, người dùng và ứng dụng. Các nhóm bảo mật và nhà phát triển nên phát triển một khuôn mẫu để phân tách các nhiệm vụ.
+
++ Constant Testing and Auditing of Access Controls : Điều quan trọng là làm cho việc kiểm tra bảo mật trở thành một quy trình liên tục, nhất quán bằng cách liên tục kiểm tra và đánh giá các cơ chế kiểm soát truy cập để đảm bảo chúng hoạt động như dự định. Ngoài ra, kiểm tra hiệu quả giúp các nhóm xác định các lỗ hổng và lỗ hổng mới hơn khi chúng xuất hiện, nâng cao sự tự tin của tổ chức trong việc triển khai kiểm soát truy cập của họ.
+
++ Clean Code with Binary Access Controls : Mọi nhà phát triển phải đảm bảo rằng mã nguồn của họ bao gồm các quy tắc khai báo quyền truy cập cho mọi tài nguyên ở cấp mã và quyền truy cập phải bị từ chối theo mặc định. Điều quan trọng nữa là sử dụng các phương pháp mã hóa an toàn để tránh các lỗi lập trình phổ biến mà những kẻ tấn công nhắm mục tiêu để truy cập đặc quyền.
+
++ Enable RBAC : Kiểm soát truy cập dựa trên vai trò (RBAC) cho phép các tổ chức nhanh chóng triển khai kiểm soát truy cập bằng cách nhóm người dùng vào các vai trò và xác định các quyền liên quan đến từng vai trò. Với RBAC, các nhóm bảo mật có thể giảm bớt công việc hỗ trợ và quản trị CNTT, tối đa hóa hiệu quả hoạt động và cải thiện sự tuân thủ thông qua quản lý truy cập dữ liệu.
+
++ Enforce Record Ownership : Các tổ chức nên lập mô hình kiểm soát quyền truy cập liên kết từng bản ghi với User ID của tài khoản để thực hiện các tác vụ, thay vì cho phép người dùng truy cập, sửa đổi, cập nhật hoặc xóa bất kỳ bản ghi nào.
+</code></pre>
+<h3 id="portswigger-lab">PortSwigger Lab</h3>
+<h3 id="lab-unprotected-admin-functionality">Lab: Unprotected admin functionality</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has an unprotected admin panel.
+Solve the lab by deleting the user carlos. 
+</code></pre></div><p>Mô tả đã khá là khó ràng, bài lab này admin panel không được bảo vệ điều đó tạo cơ điều kiện cho các hacker truy cập vào admin và thao túng quyền của admin. Trong bài lab này thì chúng ta xóa acc Carlos là sẽ được tính hoàn thành.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unprotected_blog.txt.png?raw=true" alt="img"></p>
+<p>Đầu tiên truy cập vào lab ta sẽ thấy được 1 website bán hàng, tuy nhiên dựa vào lời gọi ý của đề bài là sẽ có admin panel tuy nhiên url như nào thì lại chưa biết, nên chúng ta sẽ gọi 1 siêu thần thú web đó là robots.txt để xác định xem có gì hay :laught:
+/robots.txt</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unprotected_robots.txt.png?raw=true" alt="img"></p>
+<p>Chà chà chà có thêm url /administrator-panel ở đây nên chúng ta thử truy cập vào url này xem sao, thì thật bất ngờ vô luôn :| đơn giản là gì lab đã nói là unprotected rồi mà :vv</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unprotected_admin_pale.png?raw=true" alt="img"></p>
+<p>Sau đó chúng ta chỉ cần xóa acc là solve lab thôi :D</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unprotected_deleteCarrlos.png?raw=true" alt="img"></p>
+<h3 id="lab-unprotected-admin-functionality-with-unpredictable-url">Lab: Unprotected admin functionality with unpredictable URL</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has an unprotected admin panel. It&#39;s located at an unpredictable location, but the location is disclosed somewhere in the application.
+Solve the lab by accessing the admin panel, and using it to delete the user carlos. 
+</code></pre></div><p>Lần này lab cũng không được bảo vệ, tuy nhiên url của bài này lại được giấu ở đâu đó trong trang web, tức là không phải siêu thần thú nữa rồi, phải dùng cách khác thôi :&laquo;</p>
+<p>Truy cập tiếp vào bài lab chúng tha sẽ thấy giao diện chính của lab là 1 trang web bán hàng như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredict_shop.png?raw=true" alt="img"></p>
+<p>Sau đó vì gợi ý là năm trong web nên ta sẽ kiểm tra source code của web bằng view page source :3</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredict_source.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">var isAdmin = false;
+if (isAdmin) {
+   var topLinksTag = document.getElementsByClassName(&#34;top-links&#34;)[0];
+   var adminPanelTag = document.createElement(&#39;a&#39;);
+   adminPanelTag.setAttribute(&#39;href&#39;, &#39;/admin-6cr3fx&#39;);
+   adminPanelTag.innerText = &#39;Admin panel&#39;;
+   topLinksTag.append(adminPanelTag);
+   var pTag = document.createElement(&#39;p&#39;);
+   pTag.innerText = &#39;|&#39;;
+   topLinksTag.appendChild(pTag);
+}
+</code></pre></div><p>Và chúng thấy được đoạn js như sau, đoạn này đang kiểm tra xem người dùng có phải admin hay không
+và sau đó nhảy đến url /admin-6cr3fx để truy cập admin panel, tuy nhiên vì không có cơ chế bảo vệ nên
+chúng ta có thể truy cập vào admin panel thủ công bằng cách gọi url.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredict_delCarlos.png?raw=true" alt="img"></p>
+<p>Truy cập vào và xóa acc Carlos để hoàn thành yêu cầu của bài lab này :3</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredict_adminpanel.png?raw=true" alt="img"></p>
+<h3 id="lab-user-role-controlled-by-request-parameter">Lab: User role controlled by request parameter</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has an admin panel at /admin, which identifies administrators using a forgeable cookie.
+
+Solve the lab by accessing the admin panel and using it to delete the user carlos.
+
+You can log in to your own account using the following credentials: wiener:peter
+</code></pre></div><p>Bài này cho sẵn panel tuy nhiên đã sử dụng cookie để phân biệt thằng nào là admin thằng nào là user ròi, nên không có chuyện đi đường đường chính chính vào admin panel được nữa phải chơi chiêu thôi :3</p>
+<p>Truy cập vào lại thấy cái shop như này và login vào với acc đã được cấp từ trước :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_requestparameter_shop.png?raw=true" alt="img">
+Nhảy vô admin panel thì nó đập cho cái dòng này vô mặt :|</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">Admin interface only available if logged in as an administrator 
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_requestparameter_checkadmin.png?raw=true" alt="img"></p>
+<p>Theo như kinh nghiệm tích tụ lâu nay thì rõ ràng là trong request đã có cookie session để phân biêt có phải admin hay không rồi</p>
+<p>Nên chúng ta dùng BurpSuite bắt request xem thử như nào</p>
+<p>Bất ngờ chưa cái admin nó rõ ràng luôn kìa admin=false là quyền hạn của weiner nên là muốn upgrade lên admin thì chỉnh lại true thôi</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_requestparameter_adminpanel.png?raw=true" alt="img"></p>
+<p>Như sau thì có thể thấy chúng ta đã vào đc admin panel</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_requestparameter_delCarrlos.png?raw=true" alt="img"></p>
+<p>Xóa carlos và solveeeeeeee</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_requestparameter_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-user-role-can-be-modified-in-user-profile">Lab: User role can be modified in user profile</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback"> This lab has an admin panel at /admin. It&#39;s only accessible to logged-in users with a roleid of 2.
+Solve the lab by accessing the admin panel and using it to delete the user carlos.
+You can log in to your own account using the following credentials: wiener:peter 
+</code></pre></div><p>Bài này thì lại cho tiếp đường url /admin tuy nhiên lần này admin sẽ được định dạng bằng roleid = 2 . Thế chắc cú là roleid của acc count đc cấp là khác 2 rồi :|</p>
+<p>Tuy cập vào lab cùng account được cấp sau đó truy cập admin panel thì vẫn dòng chữ quen thuộc tuy nhiên mình đã liếc mắt soi mói thử xem roleid nó ở đâu trong cái request admin panel nhưng lại không có :|</p>
+<p>Thế là mình đoán rằng nó nằm đâu đó trong profile của account rồi tuy nhiên mình đang ở url /my-account rồi mà có thấy gì đâu ?? Nhưng lại có chức năng change email nên mình test thử và bắt request lại thì nó như này này :</p>
+<p>Có phải rõ ràng quá rồi không, theo như cú pháp trên request để change email thì chúng ta maybeeeeeee có thể change roleid nhi ?? suy nghĩ hợp lý mà :|</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_usserprofile_changeroleid.png?raw=true" alt="img"></p>
+<p>Mà hợp lý thì thử thôi.</p>
+<p>Thử chơi chơi ai ngờ được thật, thật ra đây là do cơ chế update csdl của website nên việc mình update roleid là 1 trong những &ldquo;tính năng&rdquo; không mong muốn của dev thôi 🚑</p>
+<p>Vì mình đã thay đổi roleid nên là việc truy cập admin panel để xóa là hoàn toàn được phép 🤠🤠🤠🤠</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_usserprofile_adminpanel.png?raw=true" alt="img"></p>
+<p>Solve đi nào</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_usserprofile_deleteacc.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_usserprofile_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-url-based-access-control-can-be-circumvented">Lab: URL-based access control can be circumvented</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This website has an unauthenticated admin panel at /admin, but a front-end system has been configured to block external access to that path. However, the back-end application is built on a framework that supports the X-Original-URL header.
+
+To solve the lab, access the admin panel and delete the user carlos.
+</code></pre></div><p>Lần này lại là 1 sự thay đổi nho nhỏ đó chính là lần này lab đã sử dụng framework X-Original-URL, về cơ chế này thì đối với các phương thức POST sẽ deny những url như là /admin, /delete ,&hellip;.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_circumvented_adminpanel.png?raw=true" alt="img"></p>
+<p>Test thử cái web thì y như rằng, từ chối cái nhe. Tuy nhiên khi thử format của X-Original-URL thì thấy rằng chúng ta đã truy cập được vào admin panel èo èo èo</p>
+<p>Thế là chúng ta chỉ việc xóa Carlos như sau 🚑🚑🚑🚑</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_circumvented_dellCarlos.png?raw=true" alt="img"></p>
+<p>Solveee</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_circumvented_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-method-based-access-control-can-be-circumvented">Lab: Method-based access control can be circumvented</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab implements access controls based partly on the HTTP method of requests. You can familiarize yourself with the admin panel by logging in using the credentials administrator:admin.
+
+To solve the lab, log in using the credentials wiener:peter and exploit the flawed access controls to promote yourself to become an administrator.
+</code></pre></div><pre><code>![img](https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_accescircumvented_adminpanel.png?raw=true)
+</code></pre>
+<h3 id="lab-user-id-controlled-by-request-parameter">Lab: User ID controlled by request parameter</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a horizontal privilege escalation vulnerability on the user account page.
+
+To solve the lab, obtain the API key for the user carlos and submit it as the solution.
+
+You can log in to your own account using the following credentials: wiener:peter
+</code></pre></div><p>Về bài lab này chúng ta sẽ được tiếp cận tới 1 phong cách leo thang đặc quyền khác, đó chính là leo thang đặc quyền theo chiều ngang 😆😆😆 hay nói 1 cách khác bạn sẽ chiếm được đặc quyền của 1 account cùng cấp với account của mình .</p>
+<p>Để giải quyết bài lab thì phải lấy được API key từ accont carlos .</p>
+<p>Truy cập và login vào acc wiener chúng ta có thể thấy được API key, tuy nhiên thứ chúng ta cần lại là API Key của carlos</p>
+<p>Thử bắt các request của website để tìm ra điều đặc biệt, thì phát hiện ra khi từ home page request sang myaccount đã sử dụng parameter id = ?</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_idcontroler_requestwiener.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_idcontroler_carlos.png?raw=true" alt="img"></p>
+<p>Lợi dụng việc đó chúng ta thay đổi wiener thành carlos và chúng ta đã khai thác leo thang đặc quyền theo chiều ngang.</p>
+<p>Submit API key để solve.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_idcontroler_submit.png?raw=true" alt="img"></p>
+<pre><code>![img](https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_idcontroler_solve.png?raw=true)
+</code></pre>
+<h3 id="lab-user-id-controlled-by-request-parameter-with-unpredictable-user-ids">Lab: User ID controlled by request parameter, with unpredictable user IDs</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has a horizontal privilege escalation vulnerability on the user account page, but identifies users with GUIDs.
+
+To solve the lab, find the GUID for carlos, then submit his API key as the solution.
+
+You can log in to your own account using the following credentials: wiener:peter
+</code></pre></div><pre><code>Lần này thì chúng ta sẽ trải nghiệm 1 cơ chế để định danh người dùng khác đó chính là GUIDs.
+</code></pre>
+<p>Để hoàn thành bài lab chúng ta cần leak được GUIDs của carlos và submit.</p>
+<p>Đặc điểm của GUIDs là dùng để định danh cho user , tuy nhiên thì cũng định danh cho các bài viết hoặc comment nên chúng ta có thể dựa vào đó để tìm kiếm khi lab cho chúng ta 1 blog như sau  :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredictable_blog.png?raw=true" alt="img"></p>
+<p>Tìm kiếm carlos blog và truy cập bắt request để leak id</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredictable_blogcarlos.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredictable_carlosid.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredictable_changeidcarlos.png?raw=true" alt="img"></p>
+<p>Sau đó sử dụng phương pháp như lab trên để truy cập vào carlos account leak API Key</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredictable_carlosapikey.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_unpredictable_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-user-id-controlled-by-request-parameter-with-data-leakage-in-redirect">Lab: User ID controlled by request parameter with data leakage in redirect</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab contains an access control vulnerability where sensitive information is leaked in the body of a redirect response.
+
+To solve the lab, obtain the API key for the user carlos and submit it as the solution.
+
+You can log in to your own account using the following credentials: wiener:peter
+</code></pre></div><p>Bài này là 1 dạng bài chuyển hướng phổ thông, chúng ta hoàn toàn có thể sử dụng cách đã làm với bài <em>Lab: User ID controlled by request parameter</em> để áp dụng vào, như v là có thể giải quyết bài này rồi :3</p>
+<h3 id="lab-user-id-controlled-by-request-parameter-with-password-disclosure">Lab: User ID controlled by request parameter with password disclosure</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has user account page that contains the current user&#39;s existing password, prefilled in a masked input.
+
+To solve the lab, retrieve the administrator&#39;s password, then use it to delete carlos.
+
+You can log in to your own account using the following credentials: wiener:peter
+</code></pre></div><p>Đề bài đã gợi ý rằng ngay phần account sẽ có phần cho thấy được password của người dùng, điều đó có nghĩa rằng nếu chúng ta có thể truy cập bằng id=administrator thì có thể leak được password của admin rồi.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_passdis_requestwiener.png?raw=true" alt="img"></p>
+<p>Vậy chúng ta làm tương tự những lab trước , bắt các request lại để kiểm tra và khai thác như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_passdis_requestadmin.png?raw=true" alt="img"></p>
+<p>Leak được password như sau</p>
+<p>pwd = rektc1zrs99g9wav0gmg</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_passdis_adminacc.png?raw=true" alt="img"></p>
+<p>Truy cập vào admin panel để xóa account Carlos để sovle</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_passdis_adminpanel.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_passdis_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-insecure-direct-object-references">Lab: Insecure direct object references</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab stores user chat logs directly on the server&#39;s file system, and retrieves them using static URLs.
+
+Solve the lab by finding the password for the user carlos, and logging into their account.
+</code></pre></div><p>Bài này đặc biệt hơn, chỉ là sử dụng log để ghi lại các cuộc live chat , để bài yêu cầu chúng ta tìm kiểm đâu đó trong live chat tìm ra password của carlos</p>
+<p>Ta thấy được chức năng live chat như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_insecure_livechat.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_insecure_viewscrip%5Bt.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_insecure_viewscrip%5Bt11.png?raw=true" alt="img"></p>
+<p>Có chức năng view transcript bắt lại request thì chúng ta thấy được nó sẽ load lại đoạn chat vừa rồi về, tuy nhiên lại thấy ffile là 2.txt điều đó có nghĩa là 1.txt là đoạn trò chuyện trước đó.</p>
+<p>Thay đổi 1.txt để load về, đọc được đoạn chat trong file log, chúng ta có được password của carlos và login</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_insecure_logincarlos.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_insecure_solve.png?raw=true" alt="img"></p>
+<h3 id="lab-multi-step-process-with-no-access-control-on-one-step">Lab: Multi-step process with no access control on one step</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab has an admin panel with a flawed multi-step process for changing a user&#39;s role. You can familiarize yourself with the admin panel by logging in using the credentials administrator:admin.
+
+To solve the lab, log in using the credentials wiener:peter and exploit the flawed access controls to promote yourself to become an administrator.
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_noonestep_admin.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_noonestep_admin_confirm.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_noonestep_wiener.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_noonestep_wiener_request.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/AccessControl/image/Actrl_noonestep_exploit.png?raw=true" alt="img"></p>
+<h3 id="referer-based-access-control">Referer-based access control</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">This lab controls access to certain admin functionality based on the Referer header. You can familiarize yourself with the admin panel by logging in using the credentials administrator:admin.
+
+To solve the lab, log in using the credentials wiener:peter and exploit the flawed access controls to promote yourself to become an administrator.
+</code></pre></div><pre><code>Solveeeeee ezzz gemm
+</code></pre>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
