@@ -61,7 +61,7 @@ rop2 Rop2 - x86 - ret2text/ret2syscall: nc 45.122.249.68 10006 Đầu tiên chú
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          17 min read
+          18 min read
         </div>
       </div>
     </header>
@@ -303,10 +303,10 @@ exploit()
 <p>File <a href="">BIN</a>, <a href="">LIBC</a></p>
 <p>Qua tới bài này rồi thì ta sẽ không ôn lại những kỹ thuật cũ nữa sẽ làm lẹ lẹ lẹ để đi ngủ .</p>
 <p>Làm thủ tục thì chúng ta thấy rằng, chỉ có NX là được bật và đây là 1 file 32 bit</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_checksec.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_checksec.png?raw=true" alt="img"></p>
 <p>Dùng IDA bắt lại và phân tích flow</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_IDA2.png??raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_IDA.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_IDA2.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_IDA.png?raw=true" alt="img"></p>
 <p>Ta rút ra được như sau :
 + Đề cho 2 file bin và lic =&gt; ret2libc
 + 32 bits
@@ -372,32 +372,32 @@ def exploit():
 io = process(BIN)
 context.log_level=&#34;debug&#34;
 exploit()
-</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_shell.png??raw=true" alt="img"></p>
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_shell.png?raw=true" alt="img"></p>
 <h3 id="buf1">Buf1</h3>
 <h6 id="heading"></h6>
 <p>Bắt đầu run thử ./buf1 xem sao:</p>
 <p>Khi nhập 1 string dài thì:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf1.png??raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf2.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf1.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf2.png?raw=true" alt="img"></p>
 <p>Ồ đã có lỗi. Bây giờ mình xem code assembly nó xem sao nào</p>
 <p>Có hàm gets, đây là hàm đọc input, và chắc chắn nó gây ra lỗi. Tiếp tục bật IDA xem thử:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf3.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf3.png?raw=true" alt="img"></p>
 <p>Trong đây có 1 hàm Puts_flag:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf4.png??raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf5.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf4.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf5.png?raw=true" alt="img"></p>
 <p>Khi check1 == 1, check2 ==2, check3 == 3 thì mình mới có flag! Vậy các biến check này đâu ra, tiếp tục xem trong IDA, ta thấy được 3 hàm như sau:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf6.png??raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf7.png??raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf8.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf6.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf7.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf8.png?raw=true" alt="img"></p>
 <p>Từ đây mình có ý tưởng như sau: bây giờ chỉ cần set biến v0 = 1337, sau đó cho nó đi qua từng hàm một ở trên để các biến check được gán, sau đó Puts_flag là xong. Tiếp tục quay lại pwn_gdb để tìm cách thực thi nào~</p>
 <p>Mình đặt break point ở main+92 là ngay chỗ gets, để xem mình nhập input vào nó sẽ nằm đâu trong stack, từ đó để mình chèn payload vào!
 Mình nhập đoạn “aaaabbbbccccddddeeefff” để tiện kiểm tra xem. Show stack sau khi nhập:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf9.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf9.png?raw=true" alt="img"></p>
 <p>Tiếp tục dùng lệnh “ni” đến ret, ta thấy tham số truyền vào là 0x7ffff7e12e00 là ở vị trí df3c và df38:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf10.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf10.png?raw=true" alt="img"></p>
 <p>Đây là nơi mình truyền các địa chỉ hàm vào return address.
 Bây giờ bỏ qua bước gán các biến check, mình thử xem nó truyền vào được hàm không đã:</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf11.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf11.png?raw=true" alt="img"></p>
 <p>Dùng lệnh “info functions”, mình có được tất cả địa chỉ của các hàm như sau:</p>
 <p>Bây giờ thử chạy lại và truyền vào hàm Func1 thử xem được không, đồng thời kiểm tra xem biến kiểm tra nằm ở vị trí nào?</p>
 <p>Đây là code thử để debug:</p>
@@ -589,7 +589,8 @@ def exploit():
 io = process(BIN)
 exploit()
 
-</code></pre></div><h1 id="pwnabletw">PWNABLE.TW</h1>
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Phaphajian_2.jpg?raw=true" alt="img"></p>
+<h1 id="pwnabletw">PWNABLE.TW</h1>
 <h2 id="start">Start</h2>
 <p>Đề bài cung cấp cho chúng ta 1 file chương trình trên Linux, vì vậy để biết thì chúng ta phải xem thử xem nó làm cái gì nào!
 &hellip;..
@@ -663,8 +664,8 @@ io.interactive()
 </code></pre></div><h3 id="dubblesort">dubblesort</h3>
 <p>Chúng ta có một file 32 bit với canary và pie . Do đó, chúng ta có thể triển khai các hướng sau :</p>
 <p>Chúng ta phải tìm cách đọc bộ nhớ để có được các libc base của libc hoặc dubblesort =&gt; ret2libc</p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/db_checksec.png??raw=true" alt="img"></p>
-<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/db_checksec_IDA.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/db_checksec.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/db_checksec_IDA.png?raw=true" alt="img"></p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">int __cdecl main(int argc, const char **argv, const char **envp)
 {
   unsigned int v3; // eax
@@ -752,7 +753,11 @@ io = process(BIN)
 exploit()
 
 
-</code></pre></div>
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Phaphajian_1.jpg?raw=true" alt="img"></p>
+<p>Tới đây là em bay lắm rồi giờ này gà sắp gáy rồi nên em xin phép học theo a Khoa là đi nằm thôi :3</p>
+<p>Hẹn gặp mn ở phần tiếp theo hoặc phần update :D \</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Phaphajian_3.jpg?raw=true" alt="img"></p>
+
     </div>
     <div class="post-footer">
       
