@@ -14,7 +14,7 @@
       
       <guid>https://datnlq.github.io/posts/phaphajian/</guid>
       <description>Welcome đến với deadline của PhaPhaJian ! Đầy là 1 trong những deadline của mình trên trường do anh PhaPhaJian cho mình trên lớp, cũng là 1 dịp để quay lại những kỹ thuật mà mình đã học qua lúc trước
-rop2 [Rop2]https://uithcm-my.sharepoint.com/:u:/g/personal/inseclab_hcmuit_edu_vn/EYd3UU7ocA1DipbNdbG32lkBa8ySQ2GQjnIOB6grKLWaSg?e=uNvgYj() - x86 - ret2text/ret2syscall: nc 45.122.249.68 10006 Đầu tiên chúng ta bước vào 1 thủ tục mà các pwner đều sẽ làm khi gặp 1 bài pwn đó chính là file và checksec để kiểm tra thông tin cung các cơ chế bảo vệ của file :</description>
+rop2 Rop2 - x86 - ret2text/ret2syscall: nc 45.122.249.68 10006 Đầu tiên chúng ta bước vào 1 thủ tục mà các pwner đều sẽ làm khi gặp 1 bài pwn đó chính là file và checksec để kiểm tra thông tin cung các cơ chế bảo vệ của file :</description>
     </item>
     
     <item>
