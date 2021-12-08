@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://datnlq.github.io/posts/accesscontrol/</loc>
-    <lastmod>2021-11-07T04:03:51+07:00</lastmod>
+    <loc>https://datnlq.github.io/posts/bof/</loc>
+    <lastmod>2021-11-22T01:09:05+07:00</lastmod>
   </url><url>
     <loc>https://datnlq.github.io/</loc>
-    <lastmod>2021-11-07T04:03:51+07:00</lastmod>
+    <lastmod>2021-11-22T01:09:05+07:00</lastmod>
   </url><url>
     <loc>https://datnlq.github.io/posts/</loc>
+    <lastmod>2021-11-22T01:09:05+07:00</lastmod>
+  </url><url>
+    <loc>https://datnlq.github.io/posts/accesscontrol/</loc>
     <lastmod>2021-11-07T04:03:51+07:00</lastmod>
   </url><url>
     <loc>https://datnlq.github.io/posts/protostar/</loc>

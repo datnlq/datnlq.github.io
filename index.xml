@@ -6,7 +6,17 @@
     <description>Recent content on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 07 Nov 2021 04:03:51 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 22 Nov 2021 01:09:05 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[LTAT] Overflow-based Exploitation</title>
+      <link>https://datnlq.github.io/posts/bof/</link>
+      <pubDate>Mon, 22 Nov 2021 01:09:05 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/bof/</guid>
+      <description>NT521 : Overflow-based Exploitation Helu mọi người, nhân tiện mình bị 1 đống bài pwn trên lớp dí nên mình viết luôn cái blog này cho vui :3 Nếu có gì sai sót thì thầy với các bạn đừng có dí em
+ELF x86 - Format string bug basic 1 #include &amp;lt;stdio.h&amp;gt; #include &amp;lt;unistd.h&amp;gt; int main(int argc, char *argv[]){ FILE *secret = fopen(&amp;#34;/challenge/app-systeme/ch5/.passwd&amp;#34;, &amp;#34;rt&amp;#34;); char buffer[32]; fgets(buffer, sizeof(buffer), secret); printf(argv[1]); fclose(secret); return 0; } Đầy là code của bài đầu tiên, như chúng ta có thể đọc hiểu được code C trên là: + Flag từ server sẽ được đọc vào secret pointer, sau đó ghi vào biến buf + In giá trị của biến argv[1] ra màn hình ==&amp;gt; từ đó chúng ta có thể suy ra rằng có thể dùng lệnh printf tận dùng lỗi fmt ở printf và in ra flag :3</description>
+    </item>
+    
     <item>
       <title>AccessControl</title>
       <link>https://datnlq.github.io/posts/accesscontrol/</link>
