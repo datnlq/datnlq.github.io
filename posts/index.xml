@@ -6,7 +6,19 @@
     <description>Recent content in Posts on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 22 Nov 2021 01:09:05 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 09 Dec 2021 08:43:30 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[Pwnable.tw] – 3×17</title>
+      <link>https://datnlq.github.io/posts/3x17/</link>
+      <pubDate>Thu, 09 Dec 2021 08:43:30 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/3x17/</guid>
+      <description>[Pwnable.tw] – 3×17 Chào các bạn nay chúng ta sẽ đến với bài tiếp theo của pwnable là bài 3x17.
+Đầu tiên chúng ta sẽ kiểm tra các thông tin cơ bản về thông tin file và các cơ chế bảo mật như sau :
+Chạy thử chương trình vào sau đó dùng IDA để có thể reverse lại code C (nếu có thể ):
+Sau khi dùng IDA lần theo flow string của file binary thì mình đã có thể tìm ra được hàm của chúng ta như sau :</description>
+    </item>
+    
     <item>
       <title>[LTAT] Overflow-based Exploitation</title>
       <link>https://datnlq.github.io/posts/bof/</link>

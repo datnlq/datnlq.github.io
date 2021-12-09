@@ -336,7 +336,8 @@ conn = ssh(host=host, port=port, user=username, password=passwd)
 io = conn.process(&#34;./ch16&#34;)
 exploit()
 </code></pre></div><h4 id="elf-x86-stack-overflow-basic-4httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-4"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-4">ELF x86 Stack overflow basic 4</a></h4>
-<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4.png?raw=true" alt="img"></p>
+<p>author : dr00py
+<img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof4.png?raw=true" alt="img"></p>
 <p>Có thể thấy mình sẽ khai thác lỗi bof ở hàm strcmp.
 Ở đây em sẽ chàn biến môi trường vào để khai thác lỗi, do bài này không để mình nhập input vào, nhưng trong đó hàm strcpy copy biến môi trường vào.
 Disassembly vào hàm GetEnv, thấy được stack có độ lớn là 0x21c = 540.
@@ -363,7 +364,8 @@ Code tìm địa chỉ env:</p>
 NOTE: nếu bị lỗi ở can’t find USERNAME thì nhớ export USERNAME=”&lt;gì gì đó&gt;” vào nha, em bị như vậy cả tiếng đồng hồ k biết mình bị sai chỗ nào :D</p>
 </blockquote>
 <h4 id="-elf-x86---stack-buffer-overflow-basic-5httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-5"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-5"> ELF x86 - Stack buffer overflow basic 5</a></h4>
-<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5.png?raw=true" alt="img"></p>
+<p>author : dr00py
+<img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5.png?raw=true" alt="img"></p>
 <div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">#include &lt;stdio.h&gt;
 #include &lt;string.h&gt;
 #include &lt;stdlib.h&gt;
@@ -459,7 +461,8 @@ Vậy việc thực thi bof ở input không được. Nhưng vẫn còn cách k
 <p>Ta có được flag như sau :</p>
 <p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof5_done.png?raw=true" alt="img"></p>
 <h4 id="elf-x86-stack-overflow-basic-6httpswwwroot-meorgenchallengesapp-systemelf-x86-stack-buffer-overflow-basic-6"><a href="https://www.root-me.org/en/Challenges/App-System/ELF-x86-Stack-buffer-overflow-basic-6">ELF x86 Stack overflow basic 6</a></h4>
-<p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6.png?raw=true" alt="img"></p>
+<p>author : dr00py
+<img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6.png?raw=true" alt="img"></p>
 <p>Xem file c của đề, cơ bản ta xác định ngay lỗi stack buffer overflow sẽ ở vị trí strcpy. Bây giờ em sẽ checksec file xem có những cơ chế nào được bật.</p>
 <p><img src="https://github.com/datnlq/Source/blob/main/NT521_LTAT/image/bof6_checksec.png?raw=true" alt="img"></p>
 <p>Sơ qua thì thấy NX Enabled. Do mục đích của bài này là mình chạy shell thành công, nhưng khi NX enabled thì mình không thể chèn shellcode vào, thay vào đó em sẽ chọn cách khác, chính là leak libc để run system(“bin/sh”).

