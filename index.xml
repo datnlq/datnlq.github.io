@@ -6,7 +6,20 @@
     <description>Recent content on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 09 Dec 2021 08:43:30 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 09 Dec 2021 14:57:14 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[Pwnable.tw] – Dubblesort</title>
+      <link>https://datnlq.github.io/posts/dubblesort/</link>
+      <pubDate>Thu, 09 Dec 2021 14:57:14 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/dubblesort/</guid>
+      <description>[Pwnable.tw] – Dubblesort Tiếp theo chúng ta sẽ làm 1 bài sử dụng kỹ thuật ret2libc :3
+Kiểm tra các cơ chế bảo vệ và các thông tin cơ bản của file
+Sau đó dùng IDA để phân tích file binary và code C:
+Chạy test thử chương trình như hình dưới thì vô tình thấy được 1 vài ký tự lạ xuất hiện sau chuỗi được in ra.
+==&amp;gt; Đây là 1 lỗi có thể khai thác</description>
+    </item>
+    
     <item>
       <title>[Pwnable.tw] – 3×17</title>
       <link>https://datnlq.github.io/posts/3x17/</link>
@@ -30,7 +43,7 @@ ELF x86 - Format string bug basic 1 #include &amp;lt;stdio.h&amp;gt; #include &a
     </item>
     
     <item>
-      <title>AccessControl</title>
+      <title>[PortSwigger] Access Control</title>
       <link>https://datnlq.github.io/posts/accesscontrol/</link>
       <pubDate>Sun, 07 Nov 2021 04:03:51 +0700</pubDate>
       
@@ -126,7 +139,7 @@ Clickjacking là gì ? Nói ngắn gọn dễ hiểu nhất là một hình th�
     </item>
     
     <item>
-      <title>DUCTF</title>
+      <title>[CTF] - DUCTF</title>
       <link>https://datnlq.github.io/posts/ductf/</link>
       <pubDate>Tue, 28 Sep 2021 22:03:55 +0700</pubDate>
       

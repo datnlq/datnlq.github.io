@@ -79,10 +79,11 @@ Sau khi dùng IDA lần theo flow string của file binary thì mình đã có t
 <p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_runtest.png?raw=true" alt="img"></p>
 <p>Sau khi dùng IDA lần theo flow string của file binary thì mình đã có thể tìm ra được hàm của chúng ta như sau :</p>
 <p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/3x17/3x17_ida.png?raw=true" alt="img"></p>
-<p>Sau khi làm các bước trên chúng ta có thể rút ra vài kết luận như sau :
-+ Đây là 1 file bin 64-bit, cơ chế bảo mật NX được bật
+<p>Sau khi làm các bước trên chúng ta có thể rút ra vài kết luận như sau :</p>
+<pre><code>+ Đây là 1 file bin 64-bit, cơ chế bảo mật NX được bật
 + IDA phân tích ra mã C tuy nhiên rất rối
-+ Flow của chương trình sẽ là thay đổi giá trị của 1 địa chỉ bất kỳ</p>
++ Flow của chương trình sẽ là thay đổi giá trị của 1 địa chỉ bất kỳ
+</code></pre>
 <p>Tới đây thì mình bị stuck 1 chút vì không thấy được hướng đi tiếp theo như nào, tuy nhiên bài này đã tiếp thêm động lực cho mình <a href="https://github.com/smokeleeteveryday/CTF_WRITEUPS/tree/master/2016/CODEGATE/pwnable/oldschool">https://github.com/smokeleeteveryday/CTF_WRITEUPS/tree/master/2016/CODEGATE/pwnable/oldschool</a></p>
 <p>Bài này đã sử dụng kỹ thuật overwrite <a href="http://blog.k3170makan.com/2018/10/introduction-to-elf-format-part-v.html">_fini_array</a>.
 _fini_array section là 1 vùng trong binary cung cấp các hàm deconstructor cần thiết cho quá trình kết thúc chương trình sau khi hàm main() return. Ngược với .init_array section là vùng cung cấp các hàm constructor cần thiết cho quá trình khởi tạo trước khi thực hiện hàm main().</p>
