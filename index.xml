@@ -13,8 +13,7 @@
       <pubDate>Fri, 24 Dec 2021 03:46:08 +0700</pubDate>
       
       <guid>https://datnlq.github.io/posts/hacknote/</guid>
-      <description>[Pwnable.tw] – hacknote https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true
-Check file và checksec ta thấy được vài điều sau:
+      <description>[Pwnable.tw] – hacknote Check file và checksec ta thấy được vài điều sau:
 + File binary đã bị strip và là file 32 bit + Canary được bật và ngăn không có thực thi shellcode trên stack  =&amp;gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.
 Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm.</description>
     </item>

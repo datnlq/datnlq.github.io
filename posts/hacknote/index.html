@@ -13,14 +13,12 @@
     
     <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="[Pwnable.tw] – Hacknote"/>
-<meta name="twitter:description" content="[Pwnable.tw] – hacknote https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true
-Check file và checksec ta thấy được vài điều sau:
+<meta name="twitter:description" content="[Pwnable.tw] – hacknote Check file và checksec ta thấy được vài điều sau:
 &#43; File binary đã bị strip và là file 32 bit &#43; Canary được bật và ngăn không có thực thi shellcode trên stack  =&gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.
 Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm."/>
 
     <meta property="og:title" content="[Pwnable.tw] – Hacknote" />
-<meta property="og:description" content="[Pwnable.tw] – hacknote https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true
-Check file và checksec ta thấy được vài điều sau:
+<meta property="og:description" content="[Pwnable.tw] – hacknote Check file và checksec ta thấy được vài điều sau:
 &#43; File binary đã bị strip và là file 32 bit &#43; Canary được bật và ngăn không có thực thi shellcode trên stack  =&gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.
 Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm." />
 <meta property="og:type" content="article" />
@@ -71,7 +69,8 @@ Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như
     </header>
     <div class="post-content">
       <h2 id="pwnabletw--hacknotehttpspwnabletwchallenge5">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#5">hacknote</a></h2>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote.png?raw=true" alt="img">
+<img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_check.png?raw=true" alt="img"></p>
 <p>Check file và checksec ta thấy được vài điều sau:</p>
 <pre><code>+ File binary đã bị strip và là file 32 bit
 + Canary được bật và ngăn không có thực thi shellcode trên stack
@@ -79,16 +78,16 @@ Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như
 <p>=&gt; Chúng ta có thể dùng IDA phân tích và sử dụng address bên IDA để đặt breakpoint cho gdb khi debug.</p>
 <p>Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như 4 option khi chạy thử chương trình, tuy nhiên thì tên hàm không được đặt đúng mà có cấu trúc là sub_##### nên chúng ta phải dựa vào flow của từng hàm để nhận biết các hàm.</p>
 <p>Đầu tiên là hàm main()</p>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_main.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_main.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_main.png?raw=true" alt="img"></p>
 <p>Hàm main sẽ nhận input và chuyển đến các hàm tương ứng</p>
 <p>Tiếp theo là hàm addnote()</p>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_addnote.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_addnote.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_addnote.png?raw=true" alt="img"></p>
 <p>addnote(): thêm 1 note vào notes_list[] và mỗi khi 1 note mới được tạo sẽ có 2 câu lệnh malloc() được gọi:</p>
 <pre><code>+ notes_list[i] = malloc(8)
 + notes_list[i].content = malloc(size)
 </code></pre>
 <p>hàm tiếp là delnote()</p>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_delnote.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_delnote.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_delnote.png?raw=true" alt="img"></p>
 <p>delnote(): xóa 1 note khỏi notes_list[] và mỗi khi xóa 1 note, có 2 câu lệnh free() được gọi:</p>
 <pre><code>+ free(notes_list[i].content)
 + free(notes_list[i])
@@ -96,7 +95,7 @@ Sử dụng IDA xem code C t thấy được có 4 hàm chính tương tự như
 <p>hàm () or printnode()</p>
 <p>printnode(): in nội dung của note.
 show(): in nội dung của note ra màn hình.</p>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_show.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_show.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_IDA_show.png?raw=true" alt="img"></p>
 <p>Về dạng bài như này chúng ta nên tìm hiểu qua fastbin cùng kỹ thuật mà mình được 1 người bạn chỉ cho là Use After Free :3</p>
 <h4 id="fastbinhttpsheap-exploitationdhavalkapilcomdiving_into_glibc_heapbins_chunks"><a href="https://heap-exploitation.dhavalkapil.com/diving_into_glibc_heap/bins_chunks">fastbin</a></h4>
 <p>Có 10 fastbin. Mỗi bin này duy trì một danh sách liên kết duy nhất. Việc thêm và xóa diễn ra từ đầu danh sách này (cách thức LIFO).
@@ -107,14 +106,14 @@ Mỗi bin có các khối có cùng kích thước. 10 bin mỗi bin có các kh
 </code></pre>
 <p>Bởi vì fastbin theo cơ chế LIFO nên nhưng chuck mình mới được free() sẽ được cấp phát trước nếu mình gọi hàm malloc() đây là cốt lỗi để mình khai thác lỗi theo hướng use-after-free.</p>
 <p>Đặt breakpoint và tạo 2 note 16 byte lần lượt là AAAA và BBBB sau khi mở heap lên chúng ta sẽ thấy được có các chuck như sau:</p>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_heap.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_heap.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_heap.png?raw=true" alt="img"></p>
 <pre><code>+ chunk 0: notes_list[0]: 0x804b198: 8 byte đầu là header, 4 byte tiếp theo 0x0804862b là địa chỉ của hàm print_note(), 4 byte tiếp theo là địa chỉ của chunk 1 chứa notes_list[0].content. (Lưu ý: địa chỉ của chunk không tính phần header).
 + chunk 1: notes_list[0].content: 0x804b1b0: nội dung notes_list[0]: ‘AAAA’
 + chunk 2: notes_list[1]: 0x804b1c8: tương tự chunk 0.
 + chunk 3: notes_list[1].content: 0x804b1e0: nội dung notes_list[1]: ‘BBBB’
 </code></pre>
 <p>Như thế sau khi free() lần lượt list_note[0] sau đó đến list_note[1] thì fastbin sẽ cấp phát phần tiếp theo thì hệ thống sẽ lấy phần list_note[1] để lưu list_note[2] và 0x804b198 để lưu giá trị của list_note[2]. Hãy nhìn hình sau để có thể hiểu rõ hơn.</p>
-<p><a href="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_CCCC.png?raw=true">https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_CCCC.png?raw=true</a></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/hacknote/hacknote_debug_CCCC.png?raw=true" alt="img"></p>
 <p>Như chúng ta thấy thì địa chỉ của hàm print list_note[0] đã bị đè thành CCCC nếu ta gọi hàm show(0) thì chương trình sẽ gọi CCCC. Nếu chúng ta có thể thay thế CCCC thành system thì đã có thể gọi shell trong trường hợp này rồi.</p>
 <p>Nhưng trước hết, ta cần leak địa chỉ libc base. Ở đoạn add note 2, ta sẽ add 1 note kích thước 8 bytes nội dung là: (print_note address) + (puts_address).</p>
 <p>Khi gọi printnode(0) thì chương trình sẽ in địa chỉ hàm puts cho ta và ta đã leak được libc. :D Ngon lành liền</p>
