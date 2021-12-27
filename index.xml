@@ -6,7 +6,17 @@
     <description>Recent content on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 24 Dec 2021 03:46:08 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 24 Dec 2021 13:51:36 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[Pwnable.tw] – Silver Bullet</title>
+      <link>https://datnlq.github.io/posts/silverbullet/</link>
+      <pubDate>Fri, 24 Dec 2021 13:51:36 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/silverbullet/</guid>
+      <description>[Pwnable.tw] – Silver Bullet main() create_bullet() Tạo một viên đạn BULLET *bullet có tên là bullet.desc dài tối đa 0x30 kí tự do người dùng nhập vào, set power của bullet là bullet.power = len(bullet.desc).
+power_up() Ta có thể tăng sức mạnh cho bullet bằng cách nối dài thêm desc, bullet.power sẽ được cập nhật lại là chiều dài của tên mới. Chiều dài tối đa của bullet.desc vẫn là 0x30</description>
+    </item>
+    
     <item>
       <title>[Pwnable.tw] – Hacknote</title>
       <link>https://datnlq.github.io/posts/hacknote/</link>
