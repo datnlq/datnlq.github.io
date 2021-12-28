@@ -6,7 +6,18 @@
     <description>Recent content on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 24 Dec 2021 13:51:36 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 28 Dec 2021 19:39:48 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[Pwnable.tw] – Applestore</title>
+      <link>https://datnlq.github.io/posts/applestore/</link>
+      <pubDate>Tue, 28 Dec 2021 19:39:48 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/applestore/</guid>
+      <description>[Pwnable.tw] – Applestore Chương trình là 1 cửa hàng bán điện thoại iphone.
+main() menu() handler() list() Liệt kê các mặt hàng trong chương trình.
+add() Thêm 1 sản phẩm vào giỏ hàng. Các sản phẩm trong giỏ hàng được lưu trên heap dưới dạng 1 double linked list, mỗi node có kiểu là struct PRODUCT. Trong đó: PRODUCT.fd là con trỏ trỏ đến node tiếp theo trong list, PRODUCT.bk là con trỏ trỏ đến node phía trước.</description>
+    </item>
+    
     <item>
       <title>[Pwnable.tw] – Silver Bullet</title>
       <link>https://datnlq.github.io/posts/silverbullet/</link>

