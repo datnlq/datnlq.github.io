@@ -6,7 +6,16 @@
     <description>Recent content on DatNLQ</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 02 Jan 2022 15:07:26 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 06 Jan 2022 02:11:42 +0700</lastBuildDate><atom:link href="https://datnlq.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>[PortSwigger] - File upload vulnerabilities</title>
+      <link>https://datnlq.github.io/posts/fileuploadvuln/</link>
+      <pubDate>Thu, 06 Jan 2022 02:11:42 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/fileuploadvuln/</guid>
+      <description>File upload vulnerabilities What are file upload vulnerabilities? - Lỗ hổng tải lên file là gì? Lỗ hổng tải lên file là khi server web cho phép user tải file lên hệ thống file của nó mà không xác nhận đầy đủ những thứ như tên, loại, nội dung hoặc kích thước của chúng. Không thực thi đúng các hạn chế đối với những điều này có thể có nghĩa là ngay cả một chức năng tải lên hình ảnh cơ bản cũng có thể được sử dụng để tải lên các file tùy ý và có khả năng nguy hiểm.</description>
+    </item>
+    
     <item>
       <title>[PortSwigger] - Websocket</title>
       <link>https://datnlq.github.io/posts/websocket/</link>
@@ -15,6 +24,17 @@
       <guid>https://datnlq.github.io/posts/websocket/</guid>
       <description>WebSockets WebSocket là một giao thức giúp truyền dữ liệu giữa mô hình client-server qua 1 kết nối TCP duy nhất. Giao thức này sử dụng port 80 và 443 và nó là 1 phần của HTML5. Vì vậy nên giao thức websocket có thể hoạt động trên các cổng web tiêu chuẩn.
 Không giống với giao thức HTTP là cần client chủ động gửi yêu cầu cho server, client sẽ chời đợi để nhận được dữ liệu từ server.</description>
+    </item>
+    
+    <item>
+      <title>[Pwnable.tw] – Realloc</title>
+      <link>https://datnlq.github.io/posts/realloc/</link>
+      <pubDate>Fri, 31 Dec 2021 03:11:38 +0700</pubDate>
+      
+      <guid>https://datnlq.github.io/posts/realloc/</guid>
+      <description>[Pwnable.tw] – Realloc PIE bị vô hiệu hóa, điều này sẽ dễ dàng hơn cho việc leak địa chỉ.
+allocate() Đọc index đầu tiên là loại long, và giá trị chỉ có thể là 0 hoặc 1, size phải &amp;lt; = 0x78, ở đây realloc tương đương với maloc, sau đó đọc data và gán số không ở phần cuối input.
+reallocate() Đánh số, kích thước, dữ liệu, &amp;hellip; phân bổ lại một chuck bộ nhớ.</description>
     </item>
     
     <item>
